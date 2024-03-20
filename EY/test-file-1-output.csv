@@ -1,0 +1,84 @@
+question,ground_truth,llm_response,llm_rating,sql_result,nl_response
+ What resources / resource types are driving cost increase in SAP Non-Prod?,"SELECT RESOURCE, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY RESOURCE
+ORDER BY Total_Cost DESC;"," 
+SELECT
+  Project,
+  Component_Type,
+  Component_Name,
+  SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE
+  Project LIKE '%SAP Non-Prod%'
+GROUP BY
+  Project,
+  Component_Type,
+  Component_Name
+ORDER BY
+  Total_Cost DESC;
+", no,"        Project  Component_Type Component_Name    Total_Cost
+0  SAP Non-Prod  Infrastructure           None  27060.183351"," The major contributor to the cost increase in SAP Non-Prod is the Infrastructure component, which accounts for a total cost of 27060.183351. There is no further breakdown of the specific resources or resource types within the Infrastructure component provided in the result."
+ What products are driving cost increase in SAP Non-Prod?,"SELECT Product, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY Product
+ORDER BY Total_Cost DESC;"," 
+SELECT 
+  Project,
+  Product,
+  SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE
+  Project LIKE '%SAP Non-Prod%'
+GROUP BY
+  Project,
+  Product
+ORDER BY
+  Total_Cost DESC;
+", yes,"        Project                              Product    Total_Cost
+0  SAP Non-Prod       Microsoft Azure Infrastructure  20259.933710
+1  SAP Non-Prod  RHEL 7.6 for SAP Virtual Machine v2   6644.577038
+2  SAP Non-Prod              SAP Project Environment    155.066701
+3  SAP Non-Prod          Monitoring Analytics Report      0.605901"," The major products driving cost increase in SAP Non-Prod are:
+
+- Microsoft Azure Infrastructure: This product accounts for the highest cost, at $20,259.93. This could be due to increased usage of Azure resources, such as compute, storage, or networking.
+
+- RHEL 7.6 for SAP Virtual Machine v2: This product comes in second, with a cost of $6,644.58. This could be due to an increase in the number of virtual machines running RHEL or higher utilization of existing VMs.
+
+These two products together account for over 95% of the total cost in SAP Non-Prod. Monitoring Analytics Report has a negligible contribution to the total cost.
+
+It is recommended to investigate the usage patterns and optimization opportunities for Microsoft Azure Infrastructure and RHEL 7.6 for SAP Virtual Machine v2 to identify potential cost-saving measures."
+ What are the deployment ids generating more cost in SAP Non-Prod?,"SELECT Deployment_ID, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY Deployment_ID
+ORDER BY Total_Cost DESC;"," 
+SELECT Deployment_ID, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY Deployment_ID
+ORDER BY Total_Cost DESC;
+", yes,"   Deployment_ID    Total_Cost
+0         sapoms  10802.032929
+1         spradv   4516.068555
+2         rh2066   2496.167192
+3         rh2060   2274.716643
+4         spnadv   2019.949112
+5         rh203o   1873.693203
+6         rhszzn   1711.418610
+7         saprtr   1206.570260
+8         srg007    137.440081
+9         srgzzh     15.594091
+10        sprtst      4.500145
+11        srg046      2.032296
+12        srg01f      0.000233"," The report shows the top 13 deployment IDs in SAP Non-Prod ranked by their total cost. The deployment ID 'sapoms' incurs the highest cost of $10,802.03, followed by 'spradv' with a cost of $4,516.07. These two deployment IDs alone account for more than half of the total cost in SAP Non-Prod. The remaining deployment IDs have significantly lower costs, with 'srg01f' having the least cost of $0.00. This information can help decision-makers identify and prioritize cost-saving measures for SAP Non-Prod by focusing on the deployment IDs with the highest costs."
+ What projects are impacting my engagement code E-67747458?,"SELECT DISTINCT Project
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Engagement_Code = 'E-67747458';"," 
+SELECT DISTINCT Project
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Engagement_Code = 'E-67747458';
+", yes,"                         Project
+0  AY Accounting AI for Payables"," The report shows that the project ""AY Accounting AI for Payables"" is impacting your engagement code E-67747458. This project is likely related to the accounts payable process, and may be affecting your ability to engage with customers or complete other tasks related to your engagement code. You may want to investigate this project further to determine its impact on your work and take appropriate action."

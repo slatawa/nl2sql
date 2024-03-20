@@ -1,0 +1,19 @@
+table,question,ground_truth_sql
+invoice_specific, What resources / resource types are driving cost increase in SAP Non-Prod?,"SELECT RESOURCE, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY RESOURCE
+ORDER BY Total_Cost DESC;"
+invoice_specific, What products are driving cost increase in SAP Non-Prod?,"SELECT Product, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY Product
+ORDER BY Total_Cost DESC;"
+invoice_specific, What are the deployment ids generating more cost in SAP Non-Prod?,"SELECT Deployment_ID, SUM(Total) AS Total_Cost
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Project LIKE '%SAP Non-Prod%'
+GROUP BY Deployment_ID
+ORDER BY Total_Cost DESC;"
+invoice_specific, What projects are impacting my engagement code E-67747458?,"SELECT DISTINCT Project
+FROM vertexai-pgt.EY.invoice_specific
+WHERE Engagement_Code = 'E-67747458';"

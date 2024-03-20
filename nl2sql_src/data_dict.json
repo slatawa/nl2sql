@@ -1,0 +1,14 @@
+{
+    "california_housing":"This table contains information about the houses found in California district for each block group and some summary stats about them based on the 1990 census data.",   
+    "california_housing.Block_group":"block group id",  
+    "california_housing.MedInc":"median income in block group",
+    "california_housing.HouseAge":"Median age of a house within a block group; a lower number is a newer building",
+    "california_housing.AveRooms":"average number of rooms per household",
+    "california_housing.AveBedrms":"average number of bedrooms per household",
+    "california_housing.Population":"Total number of people residing within a block",
+    "california_housing.AveOccup":"average number of household members",
+    "california_housing.Latitude":"A measure of how far north a block group is; a higher value is farther north",
+    "california_housing.Longitude":"A measure of how far west a block group is; a higher value is farther west",
+    "california_housing.MedHouseVal":"median house value , expressed in hundreds of thousands of dollars ($100,000)",
+    "wine": "\n\n"
+}
