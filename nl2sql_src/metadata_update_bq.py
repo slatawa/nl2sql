@@ -15,10 +15,7 @@ def generate_metadata(project_id, location, dataset_name, model_name="text-bison
     model = TextGenerationModel.from_pretrained(model_name)
     client = bigquery.Client(project=project_id)
 
-    data = {
-        "Dataset Name": dataset_name,
-        "Tables": {}
-    }
+    data = {}
 
     for table_ref in client.list_tables(dataset_name):
         try:
@@ -38,16 +35,23 @@ def generate_metadata(project_id, location, dataset_name, model_name="text-bison
         columns = {}
         schema = table.schema
 
-        prompt = f"Describe the following columns in table '{table_name}':\n"
+        prompt = f"Describe the following columns in table '{table_name}'"
         for field in schema:
-            prompt += f"- Column Name: {field.name}, Type: {field.field_type}\n"
-        print(prompt)
+            prompt += f"- Column Name: {field.name}, Type: {field.field_type}"
+        prompt += "\nPlease generate response in 'column name : Description' format."
+        
         response = model.predict(prompt=prompt ,**parameters)
         print(response)
-        column_descriptions = response.text.strip().split("\n\n")
+        column_descriptions = [
+        line for line in response.text.strip().split("\n") if line.strip()  # Only keep non-empty lines
+        ]
 
         for i, field in enumerate(schema):
-            column_description = column_descriptions[i] if i < len(column_descriptions) else ""
+            if i < len(column_descriptions):
+                column_description = column_descriptions[i]
+            else:
+                column_description = ""  # Handle missing descriptions
+
             column_dict = {
                 'Name': field.name,
                 'Type': field.field_type,
@@ -56,7 +60,7 @@ def generate_metadata(project_id, location, dataset_name, model_name="text-bison
             }
             columns[field.name] = column_dict
 
-        data["Tables"][table_name] = {
+        data[table_name] = {
             "Table Name": table_name,
             "Description": table_description,
             "Columns": columns
@@ -68,7 +72,7 @@ if __name__ == "__main__":
     metadata = generate_metadata(
         project_id="cdii-poc",
         location="us-central1",
-        dataset_name="cdii-poc.qnadb"
+        dataset_name="cdii-poc.HHS_Program_Counts"
     )
 
     with open('updated-metadata.json', 'w') as f:
