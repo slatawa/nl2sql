@@ -2215,3 +2215,75 @@ WHERE
 <<<<
 
 
+>>>>
+Model:text-bison 
+
+Question: What county has the greatest enrollment in WIC per capita?                         
+
+Prompt:
+Only use the following tables meta-data:
+
+```
+
+Table Name : wic-redemption-by-county-by-participant-category-data-2010-2018
+
+Description: This table provides information about the enrolment data per capita, WIC vouchers by county, participant category, and year/month. It includes the number of participants who redeemed vouchers, the number of vouchers redeemed, the total cost of vouchers, the average cost per voucher, the statewide infant formula rebate, the total cost of vouchers after adjusting for the rebate, the average cost per voucher after adjusting for the rebate, and the state average cost per voucher after adjusting for the rebate
+
+This table has the following columns : 
+Vendor_Location                     (STRING) : Refers to County or region. 
+Participant_Category                     (STRING) : Refers to the type of beneficiaries. It contains values : "ALL", "Child  ", "Infant  ", "Prenatal  ", "Breastfeeding Mother  ", "Non-Breastfeeding Mother  ".
+Year_Month                     (STRING) : Year in which the vouchers are redeemed. 
+_Number_of_Participants_Redeemed_                     (STRING) : Total number of beneficiaries who have redeemed the vouchers. 
+_Number_Vouchers_Redeemed_                     (STRING) : Number of vouchers redeemed by all the beneficiaries. 
+Total_Cost_Vouchers                     (STRING) : Total cost of the vouchers redeemed by the beneficiaries. 
+Average_Cost                     (FLOAT) : Average cost of the vouchers. 
+Statewide_Infant_Formula_Rebate                     (STRING) : . 
+Total_Cost_Vouchers_Adjusted                     (STRING) : . 
+Average_Cost_Adjusted                     (STRING) : . 
+State_Average_Cost_Adjusted                     (STRING) : . 
+
+
+
+
+```
+
+**Instructions:**
+* Generate syntactically correct BigQuery SQL for the following question.
+* Use only relevant columns from the schema. DO NOT use columns not mentioned in this meta-data.
+* Use only relevant table name as provided and do not qualify tablename with backticks(`).
+* Validate column names against the schema to avoid errors.
+* Use a maximum of 10 columns.
+* Prioritize keywords that indicate calculations.
+* Use the following examples as guidelines to generate the new BigQuery SQL accordingly
+
+Question: Which county has the lowest enrollment in WIC per capita?
+SQL : SELECT Vendor_Location  AS wic_redemption_by_county_by_participant_category_data_2010_2018_vendor_location, COALESCE(SUM(SAFE_CAST(( SUBSTR (Total_Cost_Vouchers,2,  (INSTR (Total_Cost_Vouchers, ".") -2))  ) AS INT64)), 0) AS wic_redemption_by_county_by_participant_category_data_2010_2018_total_cost_of_vouchers_1 FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`  AS wic_redemption_by_county_by_participant_category_data_2010_2018 WHERE (Total_Cost_Vouchers) <> '*' OR (Total_Cost_Vouchers) IS NULL GROUP BY wic_redemption_by_county_by_participant_category_data_2010_2018_vendor_location ORDER BY wic_redemption_by_county_by_participant_category_data_2010_2018_total_cost_of_vouchers_1 ASC limit 1; 
+
+Question: Which two counties have the highest number of WIC authorized vendors compared to WIC participants?
+SQL : SELECT Vendor_Location,(vendor_cnt/total_participants)*100 as vendor_participants_ratio FROM ((SELECT TRIM(Vendor_Location) AS Vendor_Location,COALESCE(SUM(SAFE_CAST(_Number_of_Participants_Redeemed_ AS INT64))) as total_participants FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`  group by Vendor_Location) as participants JOIN (SELECT TRIM(COUNTY) AS COUNTY,count(VENDOR) as vendor_cnt FROM `cdii-poc.HHS_Program_Counts.women-infants-and-children-wic-authorized-vendors`  group by COUNTY having COUNTY is not null) as vendors ON UPPER(participants.Vendor_Location)=UPPER(vendors.COUNTY)) WHERE (vendor_cnt/total_participants)*100 is not null order by vendor_participants_ratio DESC limit 2; 
+
+Question: Which county has the greatest proportion of FPACT recipients co-enrolled in at least one additional program?
+SQL : SELECT Number AS county, COALESCE(SUM(SAFE_CAST( Person   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_beneficiaries_1 FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` WHERE ((_2_programs ) <> '*1' AND (_2_programs ) <> '*2' AND (_2_programs ) <> '0' OR (_2_programs ) IS NULL) AND (((_3_programs ) <> '*1' AND (_3_programs ) <> '*2' AND (_3_programs ) <> '0' OR (_3_programs ) IS NULL) AND ((_4_programs ) <> '*1' AND (_4_programs ) <> '*2' AND (_4_programs ) <> '0' OR (_4_programs ) IS NULL)) AND (((_5__programs ) <> '*1' AND (_5__programs ) <> '*2' AND (_5__programs ) <> '0' OR (_5__programs ) IS NULL) AND (Level ) = 'County' AND (((Number ) <> 'County Total' OR (Number ) IS NULL) AND (Program ) = 'FPACT')) GROUP BY county ORDER BY calhhs_dashboard_2015_2020_annual_data_file_total_beneficiaries_1 DESC LIMIT 1; 
+
+
+    
+
+For this question what would be the most accurate BigQuery SQL query?
+Question: What county has the greatest enrollment in WIC per capita? 
+
+Sql_query: 
+SELECT
+  Vendor_Location,
+  COALESCE(
+    SUM(SAFE_CAST(_Number_of_Participants_Redeemed_ AS INT64)),
+    0
+  ) AS total_participants
+FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`
+GROUP BY
+  Vendor_Location
+ORDER BY
+  total_participants DESC
+LIMIT 1;
+<<<<
+
+

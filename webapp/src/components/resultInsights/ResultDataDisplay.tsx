@@ -27,6 +27,7 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
   const [isSQL, setIsSQL] = useState<boolean>(false)
 
   const responseLike = (state: boolean) => {
+    console.log("User liked the generated SQL and its result")
     setIsLike(state)
     setIsDislike(false)
   }
@@ -70,7 +71,7 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
             onClick={() => responseDislike(isDislike ? false : true)}
           >
             <HandThumbDownIcon
-              title="Good response"
+              title="Not Good response"
               className={classNames(
                 "h-8 w-8 p-1",
                 isDislike ? "text-error" : "",
@@ -82,7 +83,7 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
               className="text px-4 text-sm font-bold"
               onClick={() => showSQL(isSQL ? false : true)}
             >
-              <div className="badge badge-primary badge-outline">Show SQL</div>
+              <div className="badge badge-primary badge-outline">Show Generated SQL</div>
             </button>
           )}
         </div>
@@ -91,6 +92,8 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
           <div tabIndex={0} className="no-border collapse-open collapse">
             <div className="collapse-content bg-base-200 overflow-x-scroll py-2">
               <pre>
+                For question "<u>{tableData.question}</u>" generated SQL is
+                <br></br>
                 {tableData.sql
                   .replaceAll(/\sfrom\s/gi, "\nFROM ")
                   .replaceAll(/\swhere\s/gi, "\nWHERE ")
