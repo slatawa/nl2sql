@@ -157,5 +157,17 @@ def spec():
     return "Welcome to EY Analytics"
 
 
+@app.route("/nl2sql")
+def greet_msg():
+    return "NL2SQL is a powerfull library that converts Natural language text to valid SQL commands for use in BQ"
+
+@app.route("/nl2sql/howto")
+def howto():
+    msg = "Create a Metadata_cache.json from the BQ tables with description of tables and columns \n"
+    msg += "Create a PostGreSQL Instance and database, create a table in the DB \n"
+    msg += "Insert the Sample natural language questions and corresponding SQLs in PostGreSQL \n"
+    return msg
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
