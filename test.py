@@ -36,4 +36,4 @@ question = "What projects are impacting my engagement code E-67747458?"
 
 # Convert to sql
 query = nl2sqlbq_client.generate_sql(question)
-print(query)
+print("generated query : ", query)
