@@ -1,0 +1,234 @@
+question,generated_sql
+How many people are enrolled in CalFresh?," 
+SELECT 
+  fileyear,
+  Number,
+  CalFresh
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+WHERE 
+  Program = ""CalFresh"";
+"
+How many of them live in Los Angeles County?," 
+SELECT 
+  SUM(CAST(Count AS INT64)) AS total_births
+FROM cdii-poc.HHS_Program_Counts.`20230912_births_final_county_month_sup`
+WHERE 
+  County = 'Los Angeles'
+  AND Geography_Type = 'Residence';
+"
+How has participation in CalFresh changed since 2015?," 
+SELECT
+  fileyear,
+  SUM(CAST(Person AS INT64)) AS total_enrolled
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+WHERE
+  Program = ""CalFresh""
+GROUP BY
+  fileyear
+ORDER BY
+  fileyear;
+"
+How do CalFresh program participation trends differ by race and ethnicity?," 
+SELECT
+  fileyear,
+  COALESCE(SUM(White), 0) AS White,
+  COALESCE(SUM(Black), 0) AS Black,
+  COALESCE(SUM(Hispanic), 0) AS Hispanic,
+  COALESCE(SUM(Asian_PI), 0) AS Asian_PI,
+  COALESCE(SUM(Native_American), 0) AS Native_American
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+WHERE
+  Program = 'CalFresh'
+GROUP BY
+  fileyear
+ORDER BY
+  fileyear;
+"
+How have these race and ethnicity trends changed over time?,SQL not generated
+Which county has the greatest proportion of CalFresh recipients co-enrolled in at least one additional program?," 
+SELECT Number AS county, 
+       COALESCE(SUM(CAST(Person AS INT64)), 0) AS total_calfresh_recipients,
+       COALESCE(SUM(CAST(_2_programs AS INT64)), 0) AS calfresh_coenrolled_in_2_programs,
+       COALESCE(SUM(CAST(_3_programs AS INT64)), 0) AS calfresh_coenrolled_in_3_programs,
+       COALESCE(SUM(CAST(_4_programs AS INT64)), 0) AS calfresh_coenrolled_in_4_programs,
+       COALESCE(SUM(CAST(_5__programs AS INT64)), 0) AS calfresh_coenrolled_in_5_programs,
+       (COALESCE(SUM(CAST(_2_programs AS INT64)), 0) + 
+        COALESCE(SUM(CAST(_3_programs AS INT64)), 0) + 
+        COALESCE(SUM(CAST(_4_programs AS INT64)), 0) + 
+        COALESCE(SUM(CAST(_5__programs AS INT64)), 0)) / 
+       COALESCE(SUM(CAST(Person AS INT64)), 0) AS calfresh_coenrollment_rate
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+WHERE (Level) = 'County'
+  AND (Number) <> 'County Total'
+  AND (Program) = 'CalFresh'
+GROUP BY county
+ORDER BY calfresh_coenrollment_rate DESC
+LIMIT 1;
+"
+What about three or more additional programs?," 
+SELECT
+  Program,
+  COALESCE(SUM(CAST(_3_programs AS INT64)), 0) AS three_more_programs
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+WHERE
+  _3_programs > 0
+GROUP BY
+  Program
+ORDER BY
+  three_more_programs DESC;
+"
+Which programs have the highest co-enrollment with CalFresh?," 
+SELECT
+  Program,
+  COALESCE(SUM(Person), 0) AS total_enrolled
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+WHERE
+  Program <> 'CalFresh'
+GROUP BY
+  Program
+ORDER BY
+  total_enrolled DESC;
+"
+What county has the greatest enrollment in WIC per capita?," 
+SELECT
+  Vendor_Location,
+  COALESCE(
+    SUM(CAST(_Number_of_Participants_Redeemed_ AS INT64)),
+    0
+  ) AS total_participants
+FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`
+GROUP BY
+  Vendor_Location
+ORDER BY
+  total_participants DESC
+LIMIT 1;
+"
+Which five counties have the lowest number of WIC authorized vendors compared to WIC participants?,SQL not generated
+"How do infant mortality rates, low birthweight rates, and preterm and very preterm rates compare to WIC enrollment rates by county?"," 
+WITH WIC_DATA AS (
+    SELECT
+        Vendor_Location,
+        Year_Month,
+        _Number_of_Participants_Redeemed_
+    FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`````
+    WHERE
+        Participant_Category = 'Infant'
+),
+INFANT_MORTALITY_DATA AS (
+    SELECT
+        County,
+        Year,
+        Infant_Mortality_Rate
+    FROM `cdii-poc.HHS_Program_Counts.infant-mortality-rates-by-county-2010-2018
+),
+LOW_BIRTHWEIGHT_DATA AS (
+    SELECT
+        County,
+        Year,
+        Low_Birthweight_Rate
+    FROM `cdii-poc.HHS_Program_Counts.low-birthweight-rates-by-county-2010-2018
+),
+PRETERM_BIRTH_DATA AS (
+    SELECT
+        County,
+        Year,
+        Preterm_Birth_Rate,
+        Very_Preterm_Birth_Rate
+    FROM `cdii-poc.HHS_Program_Counts.preterm-birth-rates-by-county-2010-2018
+),
+COUNTY_POPULATION_DATA AS (
+    SELECT
+        County,
+        Year,
+        Population
+    FROM `cdii-poc.HHS_Program_Counts.county-population-estimates-2010-2018
+)
+SELECT
+    WIC_DATA.Vendor_Location,
+    WIC_DATA.Year_Month,
+    WIC_DATA._Number_of_Participants_Redeemed_,
+    INFANT_MORTALITY_DATA.Infant_Mortality_Rate,
+    LOW_BIRTHWEIGHT_DATA.Low_Birthweight_Rate,
+    PRETERM_BIRTH_DATA.Preterm_Birth_Rate,
+    PRETERM_BIRTH_DATA.Very_Preterm_Birth_Rate,
+    COUNTY_POPULATION_DATA.Population
+FROM cdii-poc.HHS_Program_Counts.`WIC_DATA`
+JOIN
+    INFANT_MORTALITY_DATA ON WIC_DATA.Vendor_Location = INFANT_MORTALITY_DATA.County
+    AND WIC_DATA.Year_Month = INFANT_MORTALITY_DATA.Year
+JOIN
+    LOW_BIRTHWEIGHT_DATA ON WIC_DATA.Vendor_Location = LOW_BIRTHWEIGHT_DATA.County
+    AND WIC_DATA.Year_Month = LOW_BIRTHWEIGHT_DATA.Year
+JOIN
+    PRETERM_BIRTH_DATA ON WIC_DATA.Vendor_Location = PRETERM_BIRTH_DATA.County
+    AND WIC_DATA.Year_Month = PRETERM_BIRTH_DATA.Year
+JOIN
+    COUNTY_POPULATION_DATA ON WIC_DATA.Vendor_Location = COUNTY_POPULATION_DATA.County
+    AND WIC_DATA.Year_Month = COUNTY_POPULATION_DATA.Year;
+"
+How many Black individuals are served across CalHHS programs?," 
+SELECT  COALESCE(SUM(SAFE_CAST( Black   AS INT64)), 0) AS total_black FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` ;
+"
+What is the breakdown by program?,SQL not generated
+Has this changed over time?,SQL not generated
+Change over time by program?," 
+SELECT fileyear,
+       Program,
+       SUM(Person) AS total_enrolled
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+GROUP BY 1,2
+ORDER BY fileyear, total_enrolled DESC;
+"
+Which counties have the highest and lowest ratios of providers to enrolled participants in Medi-Cal?," 
+SELECT
+  County,
+  (
+    COUNT(DISTINCT provider.NPI) /
+    SUM(CAST(Number_of_Beneficiaries AS FLOAT64))
+  ) * 100 AS provider_to_beneficiary_ratio,
+  RANK() OVER (ORDER BY provider_to_beneficiary_ratio DESC) AS highest_rank,
+  RANK() OVER (ORDER BY provider_to_beneficiary_ratio ASC) AS lowest_rank
+FROM cdii-poc.HHS_Program_Counts.`medi-cal-and-calfresh-enrollment` AS enrollment
+LEFT JOIN
+  calhhs_medi_cal_managed_care_provider_listing AS provider
+ON
+  enrollment.County = provider.County
+WHERE
+  enrollment.Program = ""Medi-Cal and CalFresh""
+GROUP BY
+  County
+ORDER BY
+  highest_rank,
+  lowest_rank;
+"
+What is the ratio of non-suspended doctors to Medi-Cal members by County?," 
+SELECT
+  medi_cal_and_calfresh_enrollment.County,
+  (
+    SELECT COUNT(*)
+    FROM cdii-poc.HHS_Program_Counts.`provider_directory`
+    WHERE provider_directory.County = medi_cal_and_calfresh_enrollment.County
+      AND provider_directory.Provider_Type = 'Doctor'
+      AND provider_directory.Provider_Status <> 'Suspended'
+  ) /
+  medi_cal_and_calfresh_enrollment.Number_of_Beneficiaries AS ratio_of_non_suspended_doctors_to_medi_cal_members
+FROM cdii-poc.HHS_Program_Counts.`medi_cal_and_calfresh_enrollment`
+WHERE medi_cal_and_calfresh_enrollment.Program = 'Medi-Cal';
+"
+What about the ratio to licensed facilities?," 
+SELECT
+  gdhcs.County,
+  gdhcs.Program_,
+  gdhcs.Number_of_Beneficiaries,
+  (gdhcs.Number_of_Beneficiaries / licensed.Number_of_Licensed_Facilities) AS ratio_beneficiaries_to_facilities
+FROM cdii-poc.HHS_Program_Counts.`gdhcs-imdopen-datamedmed-calfreshmed-medi-cal_by-cnty_calfresh-dec-19` AS gdhcs
+JOIN
+  gdhcs-imdopen-datamedmed-calfreshmed-medi-cal_by-cnty_licensed-facilities-dec-19 AS licensed
+ON
+  gdhcs.County = licensed.County
+WHERE
+  gdhcs.Eligiblity_Date = '2019-12-31'
+ORDER BY
+  gdhcs.County,
+  gdhcs.Program_;
+"
