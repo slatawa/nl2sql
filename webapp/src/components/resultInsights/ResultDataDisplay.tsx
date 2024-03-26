@@ -39,6 +39,11 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
   const showSQL = (state: boolean) => {
     setIsSQL(state)
   }
+  
+  const buttonText = (state: boolean) =>{
+    return  state === true ? "Show SQL" : "Hide SQL"
+
+  }
 
   if (!tableData) return
   return (
@@ -83,7 +88,8 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
               className="text px-4 text-sm font-bold"
               onClick={() => showSQL(isSQL ? false : true)}
             >
-              <div className="badge badge-primary badge-outline">Show Generated SQL</div>
+              {/* <div className="badge badge-primary badge-outline">Show Generated SQL</div> */}
+              <div className="badge badge-primary badge-outline">{buttonText(isSQL ? false : true)}</div>
             </button>
           )}
         </div>
@@ -92,7 +98,7 @@ const ResultDataDisplay: React.FC<DataTableProps> = ({ tableData }) => {
           <div tabIndex={0} className="no-border collapse-open collapse">
             <div className="collapse-content bg-base-200 overflow-x-scroll py-2">
               <pre>
-                For question "<u>{tableData.question}</u>" generated SQL is
+                For question "<u>{tableData.question}</u>", generated SQL is
                 <br></br>
                 {tableData.sql
                   .replaceAll(/\sfrom\s/gi, "\nFROM ")
