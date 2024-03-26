@@ -34,8 +34,8 @@ const CUSTOMER_APPROVED_EMAILS: RegExp[] = [
 export const AppConfig: IAppConfig = {
   siteName: "EY POC",
   locale: "en",
-  logoPath: "/assets/images/rit.png",
-  simpleLogoPath: "/assets/images/rit-brain.png",
+  logoPath: "/assets/images/google.png",
+  simpleLogoPath: "/assets/images/google.png",
   imagesPath: "/assets/images",
   theme: "light",
   authProviders: ["google", "password"],
