@@ -31,6 +31,11 @@ import re
 
 from sql_gen.final_lib.nl2sql_src.nl2sql_generic import Nl2sqlBq_rag
 
+import sys
+import inspect
+
+
+from nl2sql_src import Nl2sqlBq
 
 
 app = Flask(__name__)
@@ -135,6 +140,60 @@ def genai_qa():
         return jsonify({'unique_id': unique_id, 'question': question, 'error': '', 'status': 200})
     except Exception as error:
         return jsonify({'unique_id': unique_id, 'question': question, 'error': 'Error: {}'.format(str(error)), 'status': 500})
+
+
+@app.route('/api/qna', methods=['POST'])
+def genai_qna():
+    question = request.json['question']
+    unique_id = request.json['unique_id']
+
+    project_id = os.environ['PROJECT_ID']
+    dataset_id = os.environ['DATASET_ID']
+    print(project_id, dataset_id)
+    meta_data_json_path = "cache_metadata/metadata_cache.json"
+    nl2sqlbq_client = Nl2sqlBq(project_id=project_id,
+                           dataset_id=dataset_id,
+                           metadata_json_path = meta_data_json_path, #"../cache_metadata/metadata_cache.json",
+                           model_name="text-bison"
+                           # model_name="code-bison"
+                          )
+    print(question)
+    table_identified = nl2sqlbq_client.table_filter(question)
+    print("Table Identified - app.py = ", table_identified)
+
+    result_sql = ""
+    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGLOCATION = os.environ['REGION'] #'us-central1'
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
+    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGUSER = os.environ['PG_USER'] #"postgres"
+    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+
+    nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
+    sql_query = nl2sqlbq_client.text_to_sql_execute_few_shot(question)
+    print("Generated query == ", sql_query)
+
+    nl_resp = nl2sqlbq_client.result2nl(sql_query, question)
+    print(nl_resp)
+
+    print("Final result =>  ", nl_resp)
+    if nl_resp:
+        result_data = nl_resp
+    else:
+        result_data = "No response from GenAi."
+        ##
+
+    dataset_id = 'qnadb'
+    # For this sample, the table must already exist and have a defined schema
+    table_id = 'question_answers'
+    
+    table_ref = bq_client.dataset(dataset_id).table(table_id)
+    table = bq_client.get_table(table_ref)
+    rows_to_insert = [(unique_id, result_data, result_sql,
+                           question, datetime.datetime.now(), True)]
+    errors = bq_client.insert_rows(table, rows_to_insert)
+    
+    return jsonify({'unique_id': unique_id, 'question': question, 'error': '', 'status': 200})
 
 
 @app.route("/api/display")

@@ -5,12 +5,21 @@ import sqlalchemy
 import pandas as pd
 import langchain
 import sqlglot
-from nl2sql_src.prompts import *
+# from nl2sql_src.prompts import *
+
+from prompts import *
 from langchain_google_vertexai import VertexAI
 from google.cloud import bigquery
+from nl2sql_query_embeddings import PgSqlEmb
+import os
+
+from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
+from json import loads, dumps
+from vertexai.language_models import TextGenerationModel
 
 client = bigquery.Client()
 
+# Main folder implementation
 
 class Nl2sqlBq:
     "Bigquery nl2sql class"
@@ -26,6 +35,10 @@ class Nl2sqlBq:
         if metadata_json_path:
             f = open(metadata_json_path, encoding="utf-8")
             self.metadata_json = json.loads(f.read())
+
+    def init_pgdb(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, index_file='saved_index_pgdata'):
+        # self.pge = PgSqlEmb("cdii-poc", "us-central1", "cdii-demo-temp", "demodbcdii", "postgres", "cdii-demo")
+        self.pge = PgSqlEmb(proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd)
 
     def get_all_table_names(self):
         "Provides list of table names in dataset"
@@ -151,6 +164,7 @@ class Nl2sqlBq:
         str: The transformed SQL query with case-handling mechanism applied, 
             or the original query if no transformation is needed.
         """
+        print("Case handller transform", sql_query)
         node = sqlglot.parse_one(sql_query)
 
         if (
@@ -188,14 +202,24 @@ class Nl2sqlBq:
 
             # Iterate through matches and replace the table name
             for match in matches:
+                next_text = sql_query.split(match)[1].split('\n')[0]
+                next_text = next_text.split(' ')[0]
                 # Check if the previous word is not DAY, YEAR, or MONTH
                 if re.search(r'\b(?:DAY|YEAR|MONTH)\b',
                              sql_query[:sql_query.find(match)], re.IGNORECASE) is None:
                     # Replace the next word after FROM with dataset.table
-                    replacement = f'{dataset}.{match}'
+                    if match == dataset.split('.')[0]: # checking if in generated SQL, table includes the project-id and dataset or not
+                        replacement = f'`{match}'
+                    else:
+                        replacement = f'{dataset}.`{match}`'
+
+                    # replacement = f'{dataset}.{match}'
                     sql_query = re.sub(r'\bFROM\b\s+' + re.escape(match),
                                         f'FROM {replacement}', sql_query, flags=re.IGNORECASE)
-
+                    if match == dataset.split('.')[0]:
+                        sql_query = sql_query.replace(f'{match}{next_text}', f'{match}{next_text}`')
+            sql_query = sql_query.replace('CAST', 'SAFE_CAST')
+            sql_query = sql_query.replace('SAFE_SAFE_CAST', 'SAFE_CAST')
             return sql_query
         else:
             return ""
@@ -226,6 +250,51 @@ class Nl2sqlBq:
             response = self.llm.invoke(sql_prompt)
             sql_query = response.replace('sql', '').replace('```', '')
             sql_query = self.case_handler_transform(sql_query)
+            sql_query = self.add_dataset_to_query(sql_query)
+            with open(logger_file, 'a',encoding="utf-8") as f:
+                f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
+                         \n\nPrompt:{sql_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
+            return sql_query
+        except Exception as exc:
+            raise Exception(traceback.print_exc()) from exc
+
+    def generate_sql_few_shot(self, question, table_name=None, logger_file="log.txt"):
+        # Main function which converts NL to SQL
+
+        # step-1 table selection
+        try:
+            if not table_name:
+                if len(self.metadata_json.keys())>1:
+                    table_list = self.table_filter(question)
+                    table_name = table_list[0]
+                else:
+                    table_name = list(self.metadata_json.keys())[0]
+            table_json = self.metadata_json[table_name]
+            columns_json = table_json["Columns"]
+            columns_info = ""
+            for column_name in columns_json:
+                column = columns_json[column_name]            
+                column_info = f"""{column["Name"]} \
+                    ({column["Type"]}) : {column["Description"]}. {column["Examples"]}\n"""
+                columns_info = columns_info + column_info
+
+            few_shot_json = self.pge.search_matching_queries(question)
+            few_shot_examples = ""
+            for item in few_shot_json:
+                example_string = f"Question: {item['question']}"
+                few_shot_examples += example_string + "\n"
+                example_string = f"SQL : {item['sql']} "
+                few_shot_examples += example_string + "\n\n"
+
+            sql_prompt = Sql_Generation_prompt_few_shot.format(table_name = table_json["Name"], 
+                                                      table_description = table_json["Description"],
+                                                      columns_info = columns_info, few_shot_examples = few_shot_examples, question = question)
+            #print(sql_prompt)
+            response = self.llm.invoke(sql_prompt)
+            sql_query = response.replace('sql', '').replace('```', '')
+            
+            # sql_query = self.case_handler_transform(sql_query)
+            
             sql_query = self.add_dataset_to_query(sql_query)
             with open(logger_file, 'a',encoding="utf-8") as f:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
@@ -267,6 +336,17 @@ class Nl2sqlBq:
             return results
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
+
+    def text_to_sql_execute_few_shot(self,question, table_name = None, logger_file = "log.txt"):
+        "Converts text to sql and also executes sql query"
+        try:
+            query = self.generate_sql_few_shot(question,table_name,logger_file = logger_file)
+            print(query)
+            results = self.execute_query(query)
+            return results
+        except Exception as exc:
+            raise Exception(traceback.print_exc()) from exc
+
 
     def result2nl(self,result, question, insight=True):
         """
@@ -366,4 +446,37 @@ class Nl2sqlBq:
             return df
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
-        
+
+
+if __name__ == '__main__':
+
+    project_id = os.environ['PROJECT_ID']
+    dataset_id = os.environ['DATASET_ID']
+    print(project_id, dataset_id)
+    meta_data_json_path = "cache_metadata/metadata_cache.json"
+    nl2sqlbq_client = Nl2sqlBq(project_id=project_id,
+                           dataset_id=dataset_id,
+                           metadata_json_path = meta_data_json_path, #"../cache_metadata/metadata_cache.json",
+                           model_name="text-bison"
+                           # model_name="code-bison"
+                          )
+    questions = ["How many people are enrolled in CalFresh?",
+                 "What county has the greatest enrollment in WIC per capita?"]
+    question = questions[0]
+    print(question)
+    table_identified = nl2sqlbq_client.table_filter(question)
+    print("Table Identified - app.py = ", table_identified)
+
+    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGLOCATION = os.environ['REGION'] #'us-central1'
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
+    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGUSER = os.environ['PG_USER'] #"postgres"
+    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+
+    nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
+    sql_query = nl2sqlbq_client.text_to_sql_execute_few_shot(question)
+    print("Generated query == ", sql_query)
+
+    nl_resp = nl2sqlbq_client.result2nl(sql_query, question)
+    print(nl_resp)

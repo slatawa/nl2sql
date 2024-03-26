@@ -11,6 +11,7 @@ from .nl2sql_query_embeddings import PgSqlEmb
 
 client = bigquery.Client()
 
+# sub--folder implemetation
 
 class Nl2sqlBq_rag:
     "Bigquery nl2sql class"
@@ -205,7 +206,6 @@ Question: {question}
             # Find all matches of the pattern in the SQL query
             matches = pattern.findall(sql_query)
             
-
             # Iterate through matches and replace the table name
             for match in matches:
                 next_text = sql_query.split(match)[1].split('\n')[0]
