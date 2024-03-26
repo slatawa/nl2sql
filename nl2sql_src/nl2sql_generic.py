@@ -341,9 +341,9 @@ class Nl2sqlBq:
         "Converts text to sql and also executes sql query"
         try:
             query = self.generate_sql_few_shot(question,table_name,logger_file = logger_file)
-            print(query)
+            print("executing query ", query)
             results = self.execute_query(query)
-            return results
+            return results, query
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
 
@@ -460,9 +460,16 @@ if __name__ == '__main__':
                            model_name="text-bison"
                            # model_name="code-bison"
                           )
-    questions = ["How many people are enrolled in CalFresh?",
-                 "What county has the greatest enrollment in WIC per capita?"]
-    question = questions[0]
+    questions = ["How have these race and ethnicity trends changed over time?",
+                 "What about three or more additional programs?",
+                 "Which five counties have the lowest number of WIC authorized vendors compared to WIC participants?",
+                 "How do infant mortality rates, low birthweight rates, and preterm and very preterm rates compare to WIC enrollment rates by county?",
+                 "How many Black individuals are served across CalHHS programs?",
+                 "What is the breakdown by program?",
+                 "Has this changed over time?",
+                 "What is the ratio of non-suspended doctors to Medi-Cal members by County?",
+                 ]
+    question = questions[7]
     print(question)
     table_identified = nl2sqlbq_client.table_filter(question)
     print("Table Identified - app.py = ", table_identified)
@@ -475,7 +482,7 @@ if __name__ == '__main__':
     PGPWD = os.environ['PG_PWD'] #"cdii-demo"
 
     nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
-    sql_query = nl2sqlbq_client.text_to_sql_execute_few_shot(question)
+    sql_query, _ = nl2sqlbq_client.text_to_sql_execute_few_shot(question, 'medi-cal-and-calfresh-enrollment')
     print("Generated query == ", sql_query)
 
     nl_resp = nl2sqlbq_client.result2nl(sql_query, question)

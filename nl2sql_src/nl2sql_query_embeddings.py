@@ -151,7 +151,7 @@ class PgSqlEmb():
         self.PGDB = pg_db 
         
         # self.INDEX_FILE = 'saved_index_pgdata'
-        self.INDEX_FILE = f"cache_metadata/{index_file}"
+        self.INDEX_FILE = f"../../nl2sql-generic/nl2sql_src/cache_metadata/{index_file}"
         self.embedding_model = TextEmbeddingModel.from_pretrained("textembedding-gecko@003")
         self.pool = self.getpool()
         print("class Initiated")

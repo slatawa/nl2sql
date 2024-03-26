@@ -34,8 +34,10 @@ from sql_gen.final_lib.nl2sql_src.nl2sql_generic import Nl2sqlBq_rag
 import sys
 import inspect
 
-
-from nl2sql_src import Nl2sqlBq
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+from nl2sql_src.nl2sql_generic import Nl2sqlBq
 
 
 app = Flask(__name__)
@@ -147,10 +149,12 @@ def genai_qna():
     question = request.json['question']
     unique_id = request.json['unique_id']
 
+    print("Serving the new endpoint")
+
     project_id = os.environ['PROJECT_ID']
     dataset_id = os.environ['DATASET_ID']
     print(project_id, dataset_id)
-    meta_data_json_path = "cache_metadata/metadata_cache.json"
+    meta_data_json_path = "../../nl2sql-generic/nl2sql_src/cache_metadata/metadata_cache.json"
     nl2sqlbq_client = Nl2sqlBq(project_id=project_id,
                            dataset_id=dataset_id,
                            metadata_json_path = meta_data_json_path, #"../cache_metadata/metadata_cache.json",
@@ -170,7 +174,7 @@ def genai_qna():
     PGPWD = os.environ['PG_PWD'] #"cdii-demo"
 
     nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
-    sql_query = nl2sqlbq_client.text_to_sql_execute_few_shot(question)
+    sql_query, result_sql = nl2sqlbq_client.text_to_sql_execute_few_shot(question)
     print("Generated query == ", sql_query)
 
     nl_resp = nl2sqlbq_client.result2nl(sql_query, question)
