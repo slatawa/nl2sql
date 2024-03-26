@@ -178,8 +178,8 @@ class PgSqlEmb():
             )
         return pool
     
-    def create_table(self):
-        sql_create = """CREATE TABLE IF NOT EXISTS documents (
+    def create_table(self, table_name='documents'):
+        sql_create = f"""CREATE TABLE IF NOT EXISTS {table_name} (
              q_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
              question TEXT,
              sql TEXT,

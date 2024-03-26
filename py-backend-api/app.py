@@ -38,6 +38,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir) 
 from nl2sql_src.nl2sql_generic import Nl2sqlBq
+from nl2sql_src.nl2sql_query_embeddings import PgSqlEmb
 
 
 app = Flask(__name__)
@@ -144,7 +145,7 @@ def genai_qa():
         return jsonify({'unique_id': unique_id, 'question': question, 'error': 'Error: {}'.format(str(error)), 'status': 500})
 
 
-@app.route('/api/qna', methods=['POST'])
+@app.route('/api/sqlgen', methods=['POST'])
 def genai_qna():
     question = request.json['question']
     unique_id = request.json['unique_id']
@@ -224,12 +225,38 @@ def spec():
 def greet_msg():
     return "NL2SQL is a powerfull library that converts Natural language text to valid SQL commands for use in BQ"
 
-@app.route("/nl2sql/howto")
+@app.route("api/nl2sql/howto")
 def howto():
     msg = "Create a Metadata_cache.json from the BQ tables with description of tables and columns \n"
     msg += "Create a PostGreSQL Instance and database, create a table in the DB \n"
     msg += "Insert the Sample natural language questions and corresponding SQLs in PostGreSQL \n"
     return msg
+
+@app.route('/api/table/create', methods=['POST'])
+def create_pgtable():
+    table_name = request.json['table_name']
+    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGLOCATION = os.environ['REGION'] #'us-central1'
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
+    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGUSER = os.environ['PG_USER'] #"postgres"
+    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
+    pge.create_table(table_name)
+
+@app.route('/api/record/create', methods=['POST'])
+def create_pgtable_record():
+    question = request.json['question']
+    mappedsql = request.json['sql']
+
+    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGLOCATION = os.environ['REGION'] #'us-central1'
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
+    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGUSER = os.environ['PG_USER'] #"postgres"
+    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
+    pge.insert_row(question, mappedsql)
 
 
 if __name__ == '__main__':
