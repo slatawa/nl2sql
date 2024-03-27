@@ -1,0 +1,73 @@
+//generated dummy data from mockaroo.com
+export const QUESTIONS_API_RESPONSE_DUMMY = [
+  {
+    question: "What is the population of Tokyo?",
+    unique_id: "q1",
+    data: "The estimated population of Tokyo as of 2023 is approximately 37 million people.",
+    sql: "SELECT population FROM cities WHERE name = 'Tokyo';",
+    status: "success",
+  },
+  {
+    question: "How does photosynthesis work?",
+    unique_id: "q2",
+    data: "Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods from carbon dioxide and water.",
+    sql: "SELECT process_description FROM biology_topics WHERE topic_name = 'Photosynthesis';",
+    status: "success",
+  },
+  {
+    question: "List of prime numbers under 50",
+    unique_id: "q3",
+    data: "2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47",
+    sql: "SELECT number FROM prime_numbers WHERE number < 50;",
+    status: "success",
+  },
+  {
+    question: "What causes the seasons?",
+    unique_id: "q4",
+    data: "Seasons are caused by the tilt of the Earth's rotational axis away or toward the sun as it travels through its year-long path around the sun.",
+    sql: "SELECT cause FROM earth_science WHERE topic = 'Seasons';",
+    status: "success",
+  },
+  {
+    question: "Current president of the United States",
+    unique_id: "q5",
+    data: "As of 2024, the current president of the United States is not available.",
+    sql: "SELECT name FROM presidents WHERE country = 'United States' AND end_term IS NULL;",
+    status: "pending",
+  },
+  {
+    question: "How to make a chocolate cake?",
+    unique_id: "q6",
+    data: "To make a chocolate cake, you need flour, sugar, cocoa powder, baking powder, eggs, milk, vegetable oil, and vanilla extract.",
+    sql: "SELECT ingredients FROM recipes WHERE dish_name = 'Chocolate Cake';",
+    status: "success",
+  },
+  {
+    question: "Fastest animal in the world?",
+    unique_id: "q7",
+    data: "The fastest animal in the world is the Peregrine Falcon, capable of reaching speeds over 240 mph during its hunting stoop.",
+    sql: "SELECT name, max_speed FROM animals ORDER BY max_speed DESC LIMIT 1;",
+    status: "success",
+  },
+  {
+    question: "What is the tallest building in the world?",
+    unique_id: "q8",
+    data: "As of 2024, the tallest building in the world is the Burj Khalifa in Dubai, United Arab Emirates, standing at 828 meters tall.",
+    sql: "SELECT name, height FROM buildings WHERE name = 'Burj Khalifa';",
+    status: "success",
+  },
+  {
+    question: "Python vs. Java: Which is better?",
+    unique_id: "q9",
+    data: "The choice between Python and Java depends on the specific needs and requirements of the project. Both languages have their strengths and use cases.",
+    sql: "SELECT comparison FROM programming_languages WHERE languages IN ('Python', 'Java');",
+    status: "success",
+  },
+  {
+    question: "What are the symptoms of COVID-19?",
+    unique_id: "q10",
+    data: "Common symptoms of COVID-19 include fever, cough, fatigue, breathing difficulties, and loss of taste or smell.",
+    sql: "SELECT symptoms FROM diseases WHERE name = 'COVID-19';",
+    status: "success",
+  },
+]
