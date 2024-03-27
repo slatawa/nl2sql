@@ -22,14 +22,8 @@ from google.cloud import bigquery
 from dotenv import load_dotenv
 
 load_dotenv()
-# from nl2sql_textbison_geminipro.predict_nl2sql_geminipro import generate_sql_geminipro
-# from nl2sql_textbison_geminipro.predict_nl2sql_textbison import generate_sql_textbison1
 
-# from text2sql_prediction.predict_nl2sql import call_gen_sql, get_ask_bqs
-# from text2sql_prediction.utils import getgenai_response, parse_and_modify_query
 import re
-
-# from sql_gen.final_lib.nl2sql_src.nl2sql_generic import Nl2sqlBq_rag
 
 import sys
 import inspect
@@ -135,7 +129,7 @@ def spec():
     return "Welcome to EY Analytics"
 
 
-@app.route("/nl2sql")
+@app.route("/api/nl2sql")
 def greet_msg():
     return "NL2SQL is a powerfull library that converts Natural language text to valid SQL commands for use in BQ"
 
