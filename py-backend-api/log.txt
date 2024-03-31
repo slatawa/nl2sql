@@ -4872,3 +4872,178 @@ WHERE Program = "CalFresh";
 <<<<
 
 
+>>>>
+Model:text-bison 
+
+Question: How many people are enrolled in CalFresh?                         
+
+Prompt:
+Only use the following tables meta-data:
+
+```
+Table Name : calhhs-dashboard-2015-2020-annual-data-file
+
+Description: This table provides comprehensive annual data from 2015 to 2018 related to various programs and services offerred by the California Health and Human Services agency (CalHHS).  This table contains information related to the services, enrollment data, number of persons enrolled in more than 1 program etc.  This table also contains the data of ethnicity of individuals, their age group and gender.  This table can be used to extract information on co-enrollment, summary of enrollment in a particular program and the like. It serves as a valuable resource for analyzing trends, evaluating program effectiveness, and informing policy decisions related to healthcare, social services, and human well-being in California 
+
+This table has the following columns : 
+fileyear                     (INTEGER) : The year in which year this information is recorded. 
+Program                     (STRING) : The column has details of the programs enrolled by beneficiaries . It contains values : "CWS", "CalFresh", "CalWorks", "DDS", "Foster Care", "FPACT", "IHSS", "MediCal", "WIC".
+Level                     (STRING) : This column contains data on the region or agency units . It contains values : "County", "State Assembly", "State Senate", "U.S. Congress".
+Number                     (STRING) : This column contains name of the County to which the subscribers belong. 
+Person                     (STRING) : This column contains the total number of recipients enrolled in the program or service.  This columns is used to calculate the total number of recipients enrolled in a Program(for ex., CalFresh). 
+Cases                     (STRING) : This column refers to the number of cases associated with the program or service. 
+Medi_Cal                     (STRING) : This column refers to the number of beneficiaries enrolled for Medi_Cal progrem. 
+ACA                     (STRING) : This column refers to tbe number of beneficiaries enrolled for ACA program. 
+FPACT                     (STRING) : This column refers to the number of beneficiaries enrolled in the Family Planning, Access, Care, and Treatment (FPACT) program. 
+CalFresh                     (STRING) : This column refers to the number of beneficiaries enrolled for the CalFresh program. 
+CalWorks                     (STRING) : This column refers to the number of beneficiaries enrolled for CalWorks program. 
+IHSS                     (STRING) : This column refers to number of individuals receiving In-Home Supportive Services (IHSS). 
+Child_Welfare                     (STRING) : This contains data on the number of individuals involved in child welfare schemes. 
+Foster_Care                     (STRING) : This column contains data number of beneviciafies on foster care . 
+DDS                     (STRING) : This column contains info on individuals receiving services from the Department of Developmental Services (DDS). 
+WIC                     (STRING) : Number of individuals who are enrolled in Women, Infants, Childern (WIC) program. 
+Black                     (STRING) : This column refers to number of individuals who identify as African American . 
+White                     (STRING) : This column refers to number of individuals who identify as white. 
+Hispanic                     (STRING) : This columns refers to number of individuals who identify as Hispanic. 
+Asian_PI                     (STRING) : This columns refers to number of individuals of Asian or Pacific Islander origin. 
+Native_American                     (STRING) : Number of individuals who identify as native Americans. 
+Other_missing                     (STRING) : Number of individuals who identify as Other or whose data is not available  . 
+Female                     (STRING) : Number of individuals of Female gender. 
+Male                     (STRING) : Number of individuals of Male gender. 
+Unknown_Other_Gender                     (STRING) : Number of individuals who do identify as Male or Female. 
+age1_missing                     (STRING) : Number of individuals whose information on age is missing. 
+_17_and_Under                     (STRING) : Number of individuals who are 17 years and below age. 
+_18_and_Over                     (STRING) : Number of individuals who are 18 years and below age group. 
+age2_missing                     (STRING) : Number of individuals whose information on age is misssing. 
+_18_64                     (STRING) : Number of individuals in the age group 18 to 64. 
+_65_and_Over                     (STRING) : Number of individuals in the age group greater than 64. 
+_18_to_59                     (STRING) : Number of individuals in the age group 18 to 59. 
+_60_and_Over                     (STRING) : Number of individuals in the age group over 60. 
+_1_program                     (STRING) : Number of individuals who are enrolled in only 1 program. 
+_2_programs                     (STRING) : Number of individuals who are enrolled in 2 programs of CalHHS. 
+_3_programs                     (STRING) : number of individuals whoa are enrolled in 3 CalHHS programs. 
+_4_programs                     (STRING) : Number of individuals who are enrolled in 4 CalHHS programs. 
+_5__programs                     (STRING) : Number of individuals who are enrolled in 5 programs. 
+_1_department                     (STRING) : Number of individuals in 1 department. 
+_2_departments                     (STRING) : Number of individuals in 2 departments. 
+_3_departments                     (STRING) : Number of individuals in 3 departments. 
+_4_departments                     (STRING) : Number of individuals in 3 departments. 
+fc_age_missing                     (STRING) : Number of individuals in foster case with missing age data. 
+age_0                     (STRING) : Number of individuals in foster care aged 0. 
+_1_to_2                     (STRING) : Number of individuals in foster care aged 1 to 2. 
+_3_to_5                     (STRING) : Number of individuals in foster care aged 3 to 5. 
+_6_to_10                     (STRING) : Number of individuals in foster care aged 5 to 10. 
+_11_to_15                     (STRING) : Number of individuals in foster care aged 11 to 15. 
+_16_to_17                     (STRING) : Number of individuals in foster care aged 16 to 17. 
+_18_to_20                     (STRING) : Number of individuals in foster care aged 18 to 20. 
+less_than_19                     (STRING) : Number of individuals in WIC aged less than 19. 
+_20_to_24                     (STRING) : Number of individuals in WIC aged 19 and below. 
+_25_to_29                     (STRING) : Number of individuals in WIC aged between 25 to 29. 
+_30_to_34                     (STRING) : Number of individuals in WIC aged between 30 to 34. 
+_35_and_over                     (STRING) : Number of individuals in WIC aged 35 and over. 
+wic_age_0                     (STRING) : Number of individuals in WIC aged below 1. 
+wic_age_1                     (STRING) : Number of individuals in WIC aged 1. 
+wic_age_2                     (STRING) : Number of individuals in WIC aged 2. 
+wic_age_3                     (STRING) : Number of individuals in WIC aged 3. 
+wic_age_4                     (STRING) : Number of individuals in WIC aged 4. 
+wic_age_5_to_19                     (STRING) : Number of individuals in WIC aged 5 to 19. 
+wic_age_20_and_Over                     (STRING) : Number of individuals in WIC aged over 20. 
+
+
+
+```
+
+You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+
+Only use the few relevant columns given in the question.
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Please think step by step and always validate the reponse.
+recitify each column names by referencing them from the meta-data.
+Use the following examples as guidelines to generate the new BigQuery SQL accordingly
+
+Question: Which counties have the highest and lowest ratios of providers to enrolled participants in CalFresh?
+SQL : select annual_file.Number, (count(provider.OBJECTID )/ sum(SAFE_CAST(annual_file.person AS INT64)))  *100 as ratio FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`  AS annual_file  join `cdii-poc.HHS_Program_Counts.calhhs_medi-cal_managed_care_provider_listing` as provider on annual_file.Number = provider.County where annual_file.level = 'County' and provider.RecordType = 'Provider' group by annual_file.Number order by 2 limit 5 
+
+Question: How many people are enrolled for Medi-Cal program?
+SQL : SELECT  COALESCE(SUM(SAFE_CAST( Person AS INT64)), 0) AS total_beneficiaries FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` where Program = 'Medi-Cal'; 
+
+Question: How many Hispanic beneficiaries are being served across all CalHHS programs?
+SQL : SELECT  COALESCE(SUM(SAFE_CAST( Hispanic   AS INT64)), 0) AS total_hispanic FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` ; 
+
+
+
+For this question what would be the most accurate SQL query?
+Question: How many people are enrolled in CalFresh?
+ 
+
+Sql_query: 
+SELECT  COALESCE(SUM(SAFE_CAST(Person AS INT64)), 0) AS total_enrolled
+FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` 
+WHERE Program = "CalFresh";
+<<<<
+
+
+>>>>
+Model:text-bison 
+
+Question: What county has the greatest enrollment in WIC per capita?                         
+
+Prompt:
+Only use the following tables meta-data:
+
+```
+Table Name : wic-redemption-by-county-by-participant-category-data-2010-2018
+
+Description: This table provides information about the enrolment data per capita, WIC vouchers by county, participant category, and year/month. It includes the number of participants who redeemed vouchers, the number of vouchers redeemed, the total cost of vouchers, the average cost per voucher, the statewide infant formula rebate, the total cost of vouchers after adjusting for the rebate, the average cost per voucher after adjusting for the rebate, and the state average cost per voucher after adjusting for the rebate
+
+This table has the following columns : 
+Vendor_Location                     (STRING) : Refers to County or region. 
+Participant_Category                     (STRING) : Refers to the type of beneficiaries. It contains values : "ALL", "Child  ", "Infant  ", "Prenatal  ", "Breastfeeding Mother  ", "Non-Breastfeeding Mother  ".
+Year_Month                     (STRING) : Year in which the vouchers are redeemed. 
+_Number_of_Participants_Redeemed_                     (STRING) : Total number of beneficiaries who have redeemed the vouchers. 
+_Number_Vouchers_Redeemed_                     (STRING) : Number of vouchers redeemed by all the beneficiaries. 
+Total_Cost_Vouchers                     (STRING) : Total cost of the vouchers redeemed by the beneficiaries. 
+Average_Cost                     (FLOAT) : Average cost of the vouchers. 
+Statewide_Infant_Formula_Rebate                     (STRING) : . 
+Total_Cost_Vouchers_Adjusted                     (STRING) : . 
+Average_Cost_Adjusted                     (STRING) : . 
+State_Average_Cost_Adjusted                     (STRING) : . 
+
+
+
+```
+
+You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+
+Only use the few relevant columns given in the question.
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Please think step by step and always validate the reponse.
+recitify each column names by referencing them from the meta-data.
+Use the following examples as guidelines to generate the new BigQuery SQL accordingly
+
+Question: Which county has the lowest enrollment in WIC per capita?
+SQL : SELECT Vendor_Location  AS wic_redemption_by_county_by_participant_category_data_2010_2018_vendor_location, COALESCE(SUM(SAFE_CAST(( SUBSTR (Total_Cost_Vouchers,2,  (INSTR (Total_Cost_Vouchers, ".") -2))  ) AS INT64)), 0) AS wic_redemption_by_county_by_participant_category_data_2010_2018_total_cost_of_vouchers_1 FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`  AS wic_redemption_by_county_by_participant_category_data_2010_2018 WHERE (Total_Cost_Vouchers) <> '*' OR (Total_Cost_Vouchers) IS NULL GROUP BY wic_redemption_by_county_by_participant_category_data_2010_2018_vendor_location ORDER BY wic_redemption_by_county_by_participant_category_data_2010_2018_total_cost_of_vouchers_1 ASC limit 1; 
+
+Question: Which two counties have the highest number of WIC authorized vendors compared to WIC participants?
+SQL : SELECT Vendor_Location,(vendor_cnt/total_participants)*100 as vendor_participants_ratio FROM ((SELECT TRIM(Vendor_Location) AS Vendor_Location,COALESCE(SUM(SAFE_CAST(_Number_of_Participants_Redeemed_ AS INT64))) as total_participants FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`  group by Vendor_Location) as participants JOIN (SELECT TRIM(COUNTY) AS COUNTY,count(VENDOR) as vendor_cnt FROM `cdii-poc.HHS_Program_Counts.women-infants-and-children-wic-authorized-vendors`  group by COUNTY having COUNTY is not null) as vendors ON UPPER(participants.Vendor_Location)=UPPER(vendors.COUNTY)) WHERE (vendor_cnt/total_participants)*100 is not null order by vendor_participants_ratio DESC limit 2; 
+
+Question: Which county has the greatest proportion of FPACT recipients co-enrolled in at least one additional program?
+SQL : SELECT Number AS county, COALESCE(SUM(SAFE_CAST( Person   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_beneficiaries_1 FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` WHERE ((_2_programs ) <> '*1' AND (_2_programs ) <> '*2' AND (_2_programs ) <> '0' OR (_2_programs ) IS NULL) AND (((_3_programs ) <> '*1' AND (_3_programs ) <> '*2' AND (_3_programs ) <> '0' OR (_3_programs ) IS NULL) AND ((_4_programs ) <> '*1' AND (_4_programs ) <> '*2' AND (_4_programs ) <> '0' OR (_4_programs ) IS NULL)) AND (((_5__programs ) <> '*1' AND (_5__programs ) <> '*2' AND (_5__programs ) <> '0' OR (_5__programs ) IS NULL) AND (Level ) = 'County' AND (((Number ) <> 'County Total' OR (Number ) IS NULL) AND (Program ) = 'FPACT')) GROUP BY county ORDER BY calhhs_dashboard_2015_2020_annual_data_file_total_beneficiaries_1 DESC LIMIT 1; 
+
+
+
+For this question what would be the most accurate SQL query?
+Question: What county has the greatest enrollment in WIC per capita?
+ 
+
+Sql_query: 
+SELECT Vendor_Location  AS wic_redemption_by_county_by_participant_category_data_2010_2018_vendor_location, 
+       COALESCE(SUM(SAFE_CAST(( SUBSTR (Total_Cost_Vouchers,2,  (INSTR (Total_Cost_Vouchers, ".") -2))  ) AS INT64)), 0) AS wic_redemption_by_county_by_participant_category_data_2010_2018_total_cost_of_vouchers_1 
+FROM `cdii-poc.HHS_Program_Counts.wic-redemption-by-county-by-participant-category-data-2010-2018`  
+WHERE (Total_Cost_Vouchers) <> '*' OR (Total_Cost_Vouchers) IS NULL 
+GROUP BY wic_redemption_by_county_by_participant_category_data_2010_2018_vendor_location 
+ORDER BY wic_redemption_by_county_by_participant_category_data_2010_2018_total_cost_of_vouchers_1 DESC 
+LIMIT 1;
+<<<<
+
+
