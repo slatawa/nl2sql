@@ -2185,3 +2185,68 @@ ORDER BY
 <<<<
 
 
+>>>>
+Model:text-bison 
+
+Question: How have these race and ethnicity trends changed over time?                         
+
+Prompt:
+Only use the following tables meta-data:
+
+```
+Table Name : medi-cal-and-calfresh-enrollment
+
+Description: This table provides information about the enrollment of individuals in Medi-Cal and CalFresh programs in different counties. This information in this table can be used to calculate the ratio of beneficiaries and service providers for a particular program
+
+This table has the following columns : 
+Eligiblity_Date                     (STRING) : . 
+County                     (STRING) : . 
+Program                     (STRING) : . It contains values : "CalFresh Only", "CalFresh only", "CalFresh and Medi-Cal".
+Number_of_Beneficiaries                     (INTEGER) : . 
+ANNOTATION_CODE                     (INTEGER) : . 
+COUNT_ANNOTATION_DESC                     (STRING) : . It contains values : "Cell Suppressed For Small Numbers".
+
+
+
+```
+
+You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+
+Only use the few relevant columns given in the question.
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Please think step by step and always validate the reponse.
+recitify each column names by referencing them from the meta-data.
+Use the following examples as guidelines to generate the new BigQuery SQL accordingly
+
+Question: In what way the race and ethnicity trends changed over the last few years?
+SQL : SELECT fileyear  AS calhhs_dashboard_2015_2020_annual_data_file_fileyear, COALESCE(SUM(SAFE_CAST( White   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_whites_1, COALESCE(SUM(SAFE_CAST( Black   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_blacks_1, COALESCE(SUM(SAFE_CAST( Hispanic   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_hispanics_1, COALESCE(SUM(SAFE_CAST( Asian_PI   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_asian_1, COALESCE(SUM(SAFE_CAST( Native_American   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_native_american_1 FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`  AS calhhs_dashboard_2015_2020_annual_data_file WHERE (Program ) = 'CalWorks' GROUP BY fileyear ORDER BY fileyear; 
+
+Question: How does CalWorks program participation trends compare against race and ethnicity?
+SQL : SELECT COALESCE(SUM(SAFE_CAST( White   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_whites_1, COALESCE(SUM(SAFE_CAST( Black   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_blacks_1, COALESCE(SUM(SAFE_CAST( Hispanic   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_hispanics_1,COALESCE(SUM(SAFE_CAST( Asian_PI   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_asian_1,COALESCE(SUM(SAFE_CAST( Native_American   AS INT64)), 0) AS calhhs_dashboard_2015_2020_annual_data_file_total_native_american_1 FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file` WHERE (Program ) = 'CalWorks' 
+
+Question: How has participation in Medi-Cal progressed over the years since the year 2018?
+SQL : select  year, sum(total_beneficiaries) as total_beneficiaries, round(ifnull(100 * (sum(total_beneficiaries)/lag(sum(total_beneficiaries)) over(order by year asc) - 1), 0), 2)  AS percentage_change from (SELECT fileyear AS year,  SUM(SAFE_CAST( Person   AS INT64)) total_beneficiaries, FROM `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`  AS annual_file WHERE (Program = 'Medi-Cal') group by year ORDER BY year) group by year order by year; 
+
+
+
+For this question what would be the most accurate SQL query?
+Question: How have these race and ethnicity trends changed over time?
+ 
+
+Sql_query: 
+SELECT
+  fileyear,
+  COALESCE(SUM(SAFE_CAST( White AS INT64)), 0) AS total_white,
+  COALESCE(SUM(SAFE_CAST( Black AS INT64)), 0) AS total_black,
+  COALESCE(SUM(SAFE_CAST( Hispanic AS INT64)), 0) AS total_hispanic,
+  COALESCE(SUM(SAFE_CAST( Asian_PI AS INT64)), 0) AS total_asian,
+  COALESCE(SUM(SAFE_CAST( Native_American AS INT64)), 0) AS total_native_american
+FROM
+  `cdii-poc.HHS_Program_Counts.calhhs-dashboard-2015-2020-annual-data-file`
+GROUP BY
+  fileyear
+ORDER BY
+  fileyear;
+<<<<
+
+

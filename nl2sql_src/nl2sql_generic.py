@@ -148,6 +148,9 @@ class Nl2sqlBq:
             if ':' in segment:
                 value = segment.split(':')[-1].strip()
                 tables_list.append(value.strip())
+            elif '\n' in segment:
+                value = segment.split('\n')[-1].strip()
+                tables_list.append(value.strip())
             else:
                 tables_list.append(segment)
 
@@ -469,7 +472,7 @@ if __name__ == '__main__':
                  "Has this changed over time?",
                  "What is the ratio of non-suspended doctors to Medi-Cal members by County?",
                  ]
-    question = questions[7]
+    question = questions[0]
     print(question)
     table_identified = nl2sqlbq_client.table_filter(question)
     print("Table Identified - app.py = ", table_identified)
