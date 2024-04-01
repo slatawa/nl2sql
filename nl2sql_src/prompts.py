@@ -2,6 +2,9 @@ Table_filtering_prompt = """
 You are a database expert at selecting a table from a list of tables based on their description.
 For the provided question choose what is the table_name most likely to be relevant.
 Only mention the table name from the following list and their description.
+Do not mention any information more than the table name.
+Output should be only 1 table that is the most likely table to contain the relevant data
+Do not include any special characters in the generated output
 
 Table name | description
 {only_tables_info}
