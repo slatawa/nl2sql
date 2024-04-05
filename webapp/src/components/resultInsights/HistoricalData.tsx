@@ -47,7 +47,7 @@ const HistoricalData: React.FC<HistoricalProps> = ({
   const normalizedQuestion = normalizeText(question)
 
   const defaultAnswer: IResultData = {
-    data: "Whoa there! This question is venturing into non Proof of Concept territory. Please request expanding capabilities with John Ohanian, CDII Chief Data Officer.",
+    data: "Whoa there! This question is venturing into non Proof of Concept territory. Please request expanding capabilities with the NL2SQL team.",
     question,
     sql: "",
     status: false,
