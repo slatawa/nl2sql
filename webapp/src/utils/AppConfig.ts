@@ -40,7 +40,7 @@ export const AppConfig: IAppConfig = {
   theme: "light",
   authProviders: ["google", "password"],
   authorizedDomains:
-    projectId === "cdii-poc" ? GPS_RIT_DOMAINS : CUSTOMER_APPROVED_EMAILS,
+    projectId === "sl-test-project-353312" ? GPS_RIT_DOMAINS : CUSTOMER_APPROVED_EMAILS,
 }
 
 // // These are i18n link names, put the label in the common.json file

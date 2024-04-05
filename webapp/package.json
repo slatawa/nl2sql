@@ -14,7 +14,7 @@
     "test-interactive": "jest --watch",
     "node:test": "globstar -- node --loader tsx --no-warnings --test \"__tests__/**/*.test.tsx\"",
     "translate": "ts-node ./scripts/translate.ts",
-    "deploy": "npm run build && gcloud app deploy --project=cdii-poc",
+    "deploy": "npm run build && gcloud app deploy --project=sl-test-project-353312",
     "deploy-cdii": "npm run build && gcloud app deploy --project=deductive-ship-414520"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "app.copyright": "All rights reserved.",
-  "app.description": "This demo showcases a solution to this industry vertical",
+  "app.description": "This demo showcases NL2SQL",
   "app.title": "Cloud Solution",
   "actions.auth.signin-google": "Sign in with Google",
   "actions.cancel": "Cancel",
