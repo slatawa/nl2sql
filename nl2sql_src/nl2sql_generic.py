@@ -156,6 +156,29 @@ class Nl2sqlBq:
 
         return tables_list
 
+    def table_filter_promptonly(self,question):
+        """
+        This function returns the prompt for the base question  
+        in the Multi-turn execution 
+
+        Parameters:
+        - question (str): The question for which the relevant table need to be identified.
+
+        Returns:
+        list: A list of table names most likely relevant to the provided question.
+        """
+
+        only_tables_info = ""
+
+        for table in self.metadata_json:
+            only_tables_info = only_tables_info + f"{table} | \
+                {self.metadata_json[table]['Description']}\n"
+
+        prompt = Table_filtering_prompt_promptonly.format(only_tables_info = only_tables_info)
+
+        return prompt
+
+
     def case_handler_transform(self,sql_query: str) -> str:
         """
         This function implements case-handling mechanism transformation for a SQL query.
@@ -303,6 +326,53 @@ class Nl2sqlBq:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
                          \n\nPrompt:{sql_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
             return sql_query
+        except Exception as exc:
+            raise Exception(traceback.print_exc()) from exc
+
+    def generate_sql_few_shot_promptonly(self, question, table_name=None, prev_sql="", logger_file="log.txt"):
+        # Main function which converts NL to SQL
+
+        # step-1 table selection
+        try:
+            if not table_name:
+                if len(self.metadata_json.keys())>1:
+                    table_list = self.table_filter(question)
+                    table_name = table_list[0]
+                else:
+                    table_name = list(self.metadata_json.keys())[0]
+            table_json = self.metadata_json[table_name]
+            columns_json = table_json["Columns"]
+            columns_info = ""
+            for column_name in columns_json:
+                column = columns_json[column_name]            
+                column_info = f"""{column["Name"]} \
+                    ({column["Type"]}) : {column["Description"]}. {column["Examples"]}\n"""
+                columns_info = columns_info + column_info
+
+            few_shot_json = self.pge.search_matching_queries(question)
+            few_shot_examples = ""
+            for item in few_shot_json:
+                example_string = f"Question: {item['question']}"
+                few_shot_examples += example_string + "\n"
+                example_string = f"SQL : {item['sql']} "
+                few_shot_examples += example_string + "\n\n"
+
+            if prev_sql:
+                additional_context = additional_context_prompt.format(prev_sql=prev_sql)
+            else:
+                additional_context = ""
+
+            sql_prompt = Sql_Generation_prompt_few_shot_multiturn.format(
+                                table_name = table_json["Name"], 
+                                table_description = table_json["Description"],
+                                columns_info = columns_info, 
+                                few_shot_examples = few_shot_examples, 
+                                question = question,
+                                additional_context = additional_context
+                                )
+            #print(sql_prompt)
+            
+            return sql_prompt
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
 
