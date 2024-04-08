@@ -134,8 +134,12 @@ For this question what would be the most accurate SQL query?
 Question: {question}
 '''
 
-additional_context_prompt = """You are database expert who can generate SQL query statements for data analysis.
-SQL query for a prior question is given below
-{prev_sql}
-Enhance this SQL query to fulfil the requirements of the question given below
+additional_context_prompt = """As you are database expert who can generate SQL query statements from natural language statements you need to modify a given SQL to suit the current question.
+An SQL query that is generated for another related question is given below
+
+SQL Query : {prev_sql}
+
+The question given below is a follow-up question for an already answered question
+The SQL query statement that needs to be generated will be a modification or enhancement to the SQL Query statement given above
+Enhance the above given SQL query to fulfil the requirements of the question given below
 """

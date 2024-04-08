@@ -302,10 +302,6 @@ class PgSqlEmb():
         queries_array = df['question']
         sql_array = df['sql']
         
-        # Temporary as the original list of sample questions is not loaded in PostgreDB
-        queries_array = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10', 'q11', 'q12']
-        sql_array = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12']
-
         nq_emb = self.embedding_model.get_embeddings([new_query])[0].values
         nq_emb_array = np.asarray([nq_emb], dtype=np.float32)
      
@@ -320,7 +316,6 @@ class PgSqlEmb():
         
         output_json = []
         for i in range(len(scores[0])):
-            print("Identifying the list")
             res = {}
             tmp_sql = ''
             res['question'] = queries_array[id[0][i]]
