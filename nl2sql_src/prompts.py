@@ -143,3 +143,55 @@ The question given below is a follow-up question for an already answered questio
 The SQL query statement that needs to be generated will be a modification or enhancement to the SQL Query statement given above
 Enhance the above given SQL query to fulfil the requirements of the question given below
 """
+
+Table_info_template = """
+
+Table Name : {table_name}
+
+Description: {table_description}
+
+This table has the following columns : 
+{columns_info}
+\n
+"""
+
+join_prompt_template = """You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+
+Only use the few relevant columns required based on the question.
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Please think step by step and always validate the reponse.
+Rectify each column names by referencing them from the meta-data.
+
+Only use the following tables meta-data: \n
+Table 1: {table_1}
+Table 2: {table_2}
+
+Since there are two tables involved, the second table contains details that can be used along with the details in first table
+The two tables should be combined using the JOIN statements of SQL
+
+For this question what would be the most accurate SQL query?
+Question: {question}
+"""
+
+join_prompt_template_one_shot = """You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+
+Only use the few relevant columns required based on the question.
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Please think step by step and always validate the reponse.
+Rectify each column names by referencing them from the meta-data.
+
+Only use the following tables meta-data: \n
+Table 1: {table_1}
+Table 2: {table_2}
+
+Since there are two tables involved, the second table contains details that can be used along with the details in first table
+The two tables should be combined using the JOIN statements of SQL
+
+For reference, one example SQL query with JOIN between two tables is given below
+
+Question: {sample_question}
+SQL : {sample_sql}
+
+For this question what would be the most accurate SQL query?
+Question: {question}
+"""
