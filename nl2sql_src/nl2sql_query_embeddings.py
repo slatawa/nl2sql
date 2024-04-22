@@ -154,7 +154,7 @@ class PgSqlEmb():
         self.INDEX_FILE = f"../../nl2sql-generic/nl2sql_src/cache_metadata/{index_file}"
         self.embedding_model = TextEmbeddingModel.from_pretrained("textembedding-gecko@003")
         self.pool = self.getpool()
-        print("class Initiated")
+        print("PGSQL - class Initiated")
         
 
     def getconn(self) -> pg8000.dbapi.Connection:

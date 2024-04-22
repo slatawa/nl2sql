@@ -168,37 +168,59 @@ This table has the following columns :
 \n
 """
 
-join_prompt_template = """You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+join_prompt_template = """You are an SQL expert at generating SQL queries from a natural language question. 
+
+Please craft a SQL query for BigQuery that is valid for the QUESTION provided below. 
+Ensure you reference the appropriate BigQuery tables and column names provided in the SCHEMA below. 
+Break down the question meaningfully into sub questions before making a decision to generate SQL
+Understand the Business Intelligence given below to craft the SQL query
+When joining tables, employ type coercion to guarantee data type consistency for the join columns. 
+Additionally, the output column names should specify units where applicable.\n
 
 Only use the few relevant columns required based on the question.
-Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Pay attention to use only the column names that you can see in the schema description. 
+Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. 
+Do not use more than 10 columns in the query.  
 Please think step by step and always validate the reponse.
-Rectify each column names by referencing them from the meta-data.
+Rectify each column names by referencing them from the SCHEMA.
+Ensure you do not alter the table names in the SQL query
 
-Only use the following tables meta-data: \n
+SCHEMA: \n
+Project and Dataset : {data_set}
 Table 1: {table_1}
 Table 2: {table_2}
 
-Since there are two tables involved, the second table contains details that can be used along with the details in first table
-The two tables should be combined using the JOIN statements of SQL
+Business Intelligence:
+For this question, the two tables are to joined on Number and County columns in the respective tables where the RecordType having value as Provider and Level column is having value as County to calculate the ratio of number of ObjectId and total number of persons 
 
 For this question what would be the most accurate SQL query?
-Question: {question}
+QUESTION: {question}
 """
 
-join_prompt_template_one_shot = """You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
+join_prompt_template_one_shot = """You are an SQL expert at generating SQL queries from a natural language question. 
+
+Please craft a SQL query for BigQuery that addresses the QUESTION provided below. 
+Ensure you reference the appropriate BigQuery tables and column names provided in the SCHEMA below.
+Break down the question meaningfully into sub questions before making a decision to generate SQL
+Understand the Business Intelligence given below to craft the SQL query
+When joining tables, employ type coercion to guarantee data type consistency for the join columns. 
+Additionally, the output column names should specify units where applicable.\n
 
 Only use the few relevant columns required based on the question.
-Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
+Pay attention to use only the column names that you can see in the schema description. 
+Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. 
+Do not use more than 10 columns in the query.  
 Please think step by step and always validate the reponse.
-Rectify each column names by referencing them from the meta-data.
+Rectify each column names by referencing them from the SCHEMA.
+Ensure you do not alter the table names in the SQL query
 
-Only use the following tables meta-data: \n
+SCHEMA: \n
+Project and Dataset : {data_set}
 Table 1: {table_1}
 Table 2: {table_2}
 
-Since there are two tables involved, the second table contains details that can be used along with the details in first table
-The two tables should be combined using the JOIN statements of SQL
+Business Intelligence:
+For this question, the two tables are to joined on Number and County columns in the respective tables where the RecordType having value as Provider and Level column is having value as County to calculate the ratio of number of ObjectId and total number of persons 
 
 For reference, one example SQL query with JOIN between two tables is given below
 
@@ -206,5 +228,27 @@ Question: {sample_question}
 SQL : {sample_sql}
 
 For this question what would be the most accurate SQL query?
+QUESTION: {question}
+"""
+
+multi_table_prompt = """
+Tables context:
+{table_info}
+
+Example Question, SQL and tables containing the required info are given below
+You are required to identify more than 1 table that probably contains the information requested in the question given below
+Return the list of tables that may contain the information
+
+Question : {example_question} :
+SQL : {example_SQL}
+Tables: {table_name_1} and {table_name_2}
+
 Question: {question}
+Tables:
+"""
+
+follow_up_prompt = """Review the question given in above context along with the table and column description and determine whether one table contains all the required information or you need to get data from another table
+If two tables's information are required, then identify those tables from the tables info
+What are the two tables that should be joined in the SQL query
+Only mention the table name from the tables context.
 """
