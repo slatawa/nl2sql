@@ -17,6 +17,11 @@ from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
 from json import loads, dumps
 from vertexai.language_models import TextGenerationModel
 
+from vertexai.language_models import CodeChatSession
+from vertexai.language_models import CodeChatModel
+from vertexai.language_models import CodeGenerationModel
+
+
 client = bigquery.Client()
 
 # Main folder implementation
@@ -520,6 +525,182 @@ class Nl2sqlBq:
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
 
+    def table_details(self, table_name):
+        f = open(self.metadata_json, encoding="utf-8")
+        metadata_json = json.loads(f.read())
+        
+        table_json = metadata_json[table_name]
+        columns_json = table_json["Columns"]
+        columns_info = ""
+        for column_name in columns_json:
+            column = columns_json[column_name]            
+            column_info = f"""{column["Name"]} \
+                        ({column["Type"]}) : {column["Description"]}. {column["Examples"]}\n"""
+            columns_info = columns_info + column_info
+            
+        prompt = Table_info_template.format(table_name = table_name,
+                                            table_description = metadata_json[table_name]['Description'],
+                                            columns_info = columns_info)
+        return prompt
+    
+    def get_join_prompt(self, dataset, table_1_name, table_2_name, question, sample_question=None, sample_sql=None, one_shot=False ):
+        prompt=""
+        table_1 = self.table_details(table_1_name)
+        table_2 = self.table_details(table_2_name)
+
+        if one_shot:
+            prompt = join_prompt_template_one_shot.format(data_set=dataset,
+                                          table_1 = table_1,
+                                          table_2 = table_2,
+                                          sample_question = sample_question,
+                                          sample_sql = sample_sql,
+                                          question = question)
+        else:
+            prompt = join_prompt_template.format(data_set=dataset, table_1=table_1, table_2=table_2, question=question)
+
+        return prompt
+
+    def invoke_llm(self, prompt):
+        response = self.llm.invoke(prompt)
+        sql_query = response.replace('sql', '').replace('```', '')
+            
+        # sql_query = self.case_handler_transform(sql_query)
+            
+        sql_query = self.add_dataset_to_query(sql_query)
+        
+        # with open(logger_file, 'a',encoding="utf-8") as f:
+        #     f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
+        #                 \n\nPrompt:{join_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
+        return sql_query
+
+    def multi_turn_table_filter(self, table_1_name, table_2_name, sample_question, sample_sql, question):
+        table_info = self.table_filter_promptonly(question)
+        prompt = multi_table_prompt.format(table_info = table_info,
+                                           example_question=sample_question,
+                                           example_sql = sample_sql,
+                                           question=question,
+                                           table_1_name = table_1_name,
+                                           table_2_name = table_2_name)
+        model = GenerativeModel("gemini-1.0-pro")
+        multi_chat = model.start_chat()
+        response1 = multi_chat.send_message(prompt)
+        response2 = multi_chat.send_message(follow_up_prompt)
+        try:
+            identified_tables = response2.candidates[0].content.parts[0].text # not always consistent
+        except:
+            identified_tables = ""
+        return identified_tables
+
+    def gen_and_exec_and_self_correct_sql(self, prompt, genai_model_name="GeminiPro", max_tries=5, return_all=False):
+        tries = 0
+        error_messages = []
+        prompts = [prompt]
+        successful_queries = []
+        TEMPERATURE = 0.3
+        MAX_OUTPUT_TOKENS=8192
+
+        MODEL_NAME = 'codechat-bison-32k'
+        code_gen_model = CodeChatModel.from_pretrained(MODEL_NAME)
+        
+        model = GenerativeModel("gemini-1.0-pro")
+
+        if genai_model_name == "GeminiPro":
+            chat_session = model.start_chat()
+        else:        
+            chat_session = CodeChatSession(model=code_gen_model, 
+                                        temperature=TEMPERATURE, 
+                                        max_output_tokens=MAX_OUTPUT_TOKENS)
+
+        while tries < max_tries:
+            try:
+                if genai_model_name == "GeminiPro":
+                    response = chat_session.send_message(prompt)
+                else:
+                    response = chat_session.send_message(prompt, temperature=TEMPERATURE, max_output_tokens=MAX_OUTPUT_TOKENS)
+
+                generated_sql_query = response.text
+                generated_sql_query = '\n'.join(generated_sql_query.split('\n')[1:-1])
+
+                generated_sql_query = nl2sqlbq_client.case_handler_transform(generated_sql_query)
+                generated_sql_query = nl2sqlbq_client.add_dataset_to_query(generated_sql_query)
+                df = client.query(generated_sql_query).to_dataframe()
+                successful_queries.append({
+                    "query": generated_sql_query,
+                    "dataframe": df
+                })
+                if len(successful_queries) > 1:
+                    prompt = f"""Modify the last successful SQL query by making changes to it and optimizing it for latency. 
+                        ENSURE that the NEW QUERY is DIFFERENT from the previous one while prioritizing faster execution.
+                        Reference the tables only from the above given project and dataset
+                        The last successful query was:
+                        {successful_queries[-1]["query"]}"""
+            except Exception as e:
+                msg = str(e)
+                error_messages.append(msg)
+                prompt = f"""Encountered an error: {msg}. 
+                    To address this, please generate an alternative SQL query response that avoids this specific error. 
+                    Follow the instructions mentioned above to remediate the error. 
+
+                    Modify the below SQL query to resolve the issue and ensure it is not a repetition of all previously generated queries.
+                    {generated_sql_query}
+                
+                    Ensure the revised SQL query aligns precisely with the requirements outlined in the initial question.
+                    Keep the table names as it is. Do not change hyphen to underscore character
+                    Additionally, please optimize the query for latency while maintaining correctness and efficiency."""
+                prompts.append(prompt)
+
+            tries += 1
+
+        if len(successful_queries) == 0:
+            return {
+                "error": "All attempts exhausted.",
+                "prompts": prompts,
+                "errors": error_messages
+            }
+        else:
+            df = pd.DataFrame([(q["query"], q["dataframe"]) for q in successful_queries], columns=["Query", "Result"])
+            return {
+                "dataframe": df
+            }
+ 
+    def generate_sql_with_join(self, dataset, table_1_name, table_2_name, question, example_table1, example_table2, sample_question=None, sample_sql=None, , one_shot=False, join_gen="STANDARD"):
+        gen_join_sql = ""
+        match join_gen:
+            case 'STANDARD':
+                if not one_shot:
+                    # Zero-shot Join query generation
+                    join_prompt = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question)
+                    gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt)
+                    print("SQL query wiith Join - ", gen_join_sql)
+                else:
+                    # One-shot Join query generation
+                    join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question, sample_question, sample_sql, few_shot=True)
+                    gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt_one_shot)
+                    print("SQL query wiith Join - ", gen_join_sql)
+            
+            case 'MULTI_TURN':
+                table_1_name, table_2_name = nl2sqlbq_client.multi_turn_table_filter(table_1_name = example_table1,
+                                                                         table_2_name=example_table2,
+                                                                         example_question=sample_question,
+                                                                         example_sql=sample_sql,
+                                                                         question=question)
+                # One-shot Join query generation
+                join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question, sample_question, sample_sql, few_shot=True)
+                gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt_one_shot)
+                print("SQL query wiith Join - ", gen_join_sql)
+                
+            case 'SELF_CORRECT':
+                join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question, sample_question, sample_sql, few_shot=True)
+                # Self-Correction Approach
+                responses = nl2sqlbq_client.gen_and_exec_and_self_correct_sql(join_prompt_one_shot)
+                print(responses)
+                gen_join_sql = responses[0]['query']
+
+        return gen_join_sql
+
+        
+
+
 
 if __name__ == '__main__':
 
@@ -560,3 +741,50 @@ if __name__ == '__main__':
 
     nl_resp = nl2sqlbq_client.result2nl(sql_query, question)
     print(nl_resp)
+
+    table_1_name = ""
+    table_2_name = ""
+    sample_question=""
+    sample_sql = ""
+    data_set = ""
+    example_table_1 = ""
+    example_table_2 = ""
+
+
+    # Zero-shot Join query generation
+    join_prompt = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question)
+    gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt)
+    print("SQL query wiith Join - ", gen_join_sql)
+
+    # One-shot Join query generation
+    join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question, sample_question, sample_sql, few_shot=True)
+    gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt_one_shot)
+    print("SQL query wiith Join - ", gen_join_sql)
+
+
+    # Table Identification with Multi-turn approach
+    example_table_1 = ""
+    example_table_2 = ""
+    table_1_name, table_2_name = nl2sqlbq_client.multi_turn_table_filter(table_1_name = example_table_1,
+                                                                         table_2_name=example_table_2,
+                                                                         example_question=sample_question,
+                                                                         example_sql=sample_sql,
+                                                                         question=question)
+    # One-shot Join query generation
+    join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(data_set, table_1_name, table_2_name, question, sample_question, sample_sql, few_shot=True)
+    gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt_one_shot)
+    print("SQL query wiith Join - ", gen_join_sql)
+
+    # Self-Correction Approach
+    responses = nl2sqlbq_client.gen_and_exec_and_self_correct_sql(join_prompt_one_shot)
+    print(responses)
+
+    # Common function to perform either of the operations
+    gen_join_sql = nl2sqlbq_client.generate_sql_with_join(data_set,
+                                                          table_1_name, table_2_name,
+                                                          question,
+                                                          example_table_1, example_table_2,
+                                                          sample_question, sample_sql,
+                                                          True, 
+                                                          "STANDARD" # STANDARD or  MULTI_TURN or SELF_CORRECT 
+                                                          )
