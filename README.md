@@ -4,8 +4,10 @@
 
 ### PostgreSQL DB
 Create a PostGreSQL instance and DB in Cloud SQL
-On Google Cloud Console - 
-    select SQL 
+
+On Google Cloud Console -
+
+    Select SQL
     Click Create Instance
     Select PostGreSQL
     Specify the instance name and Password.  Note: username is default postgres
@@ -21,6 +23,7 @@ On Google Cloud Console -
 Create the Dataset and import the tables and data into BQ
 
 ### Environment Variables
+```bash
 PROJECT_ID='sl-test-project' # Update for your project
 REGION='us-central1'
 DATASET_NAME='sl-test-project.EY' # Update for your project
@@ -30,6 +33,7 @@ PG_INSTANCE='test-nl2sql' # Update for your project
 PG_DB='test-db' # Update for your project
 PG_USER='postgres'
 PG_PWD='test-nl2sql' # Update for your project
+```
 
 ## Modules and Descriptions
 
@@ -51,9 +55,15 @@ nl2sql_src is the generic library for generating SQL.
 3. Others notebooks can be used for experienting and evaluating query generation
 
 ### py-backend-api
+py-backend-api consists of backend services which are created using Python Flask library. This module converts the requests to generated SQL into backend apis. 
 
+app.py is the entry point.
 
 ### WebApp
+
+webapp consists of Web application related resources.  API endpoints are mentioned in the .env.development, .env.production for development and production deployment respectively
+
+**Note** : Do not change the key names in the .env.* files. Only update the values (mostly app engine endpoints of backend deployment)
 
 
 
