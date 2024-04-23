@@ -69,13 +69,17 @@ def generate_metadata(project_id, location, dataset_name, model_name="text-bison
     return data
 
 if __name__ == "__main__":
+    PROJECT_ID = 'cdii-poc'
+    DATASET = "cdii-poc.HHS_Program_Counts"
+    OUTPUTFILE = "./cache_metadata/metadata_cache.json"
+
     metadata = generate_metadata(
-        project_id="cdii-poc",
+        project_id=PROJECT_ID,
         location="us-central1",
-        dataset_name="cdii-poc.HHS_Program_Counts"
+        dataset_name=DATASET
     )
 
-    with open('updated-metadata.json', 'w') as f:
+    with open(OUTPUTFILE, 'w') as f:
         json.dump(metadata, f, indent=4)
 
-    print(f'JSON file created successfully: updated-metadata.json')
+    print(f'JSON file created successfully: ', OUTPUTFILE)
