@@ -7,7 +7,7 @@ Create a PostGreSQL instance and DB in Cloud SQL
 
 On Google Cloud Console -
 
-    Select SQL
+    Go to Cloud SQL
     Click Create Instance
     Select PostGreSQL
     Specify the instance name and Password.  Note: username is default postgres
@@ -160,3 +160,58 @@ To deploy the webapp application on App Engine, ensure you follow these prerequi
     <webapp> is the deployed service name
 
 ## API Integration
+
+### API Endpoints 
+
+**/api/sqlgen** is the end-point that is to be used to generate the SQL.  The natural lanaugage question is to be submitted to this endpoint via a POST Https method in Json format.  Required field : "**question**"
+
+**/api/display** is used to display the latest question and the generated SQL for that question.  If there is an error in generaing the SQL for a given question, this API returns the SQL for the question if it exists in its list
+
+
+**/api/table/create** is the end-point to create a table in the PostGreSql DB.  Required field : "**table_name**"
+
+**/api/record/create** is the end-point to insert rows into the PostgreSQL table.  The inserted rows are example questions and corresponding SQLs that can be retrieved using similarity analysis for few-shot prompting in SQL generation. 
+Required fields : "**question**", "**sql**"
+
+
+# Generatiing SQL from Natural statements using the library
+
+## Using HTTP APIs
+
+### Using PostMan client or other HTTP Clients
+
+Steps to generate SQL
+1. In HTTP client (for ex. Postman), specify the URL (endpoint) and the select the method as POST
+2. Click on Body, select 'raw' type and select JSON as the type
+3. specify {"question":"<youur question>, "unique_id":"<unique id - can be anyreference id>}
+4. Click Send
+
+### Using Python requests library
+
+```code
+import requests
+import json
+
+url_sql_gen = '<your quuestion here>/api/sqlgen'
+url_display = '<your quuestion here>/api/display'
+uniqueid="unique id -- can be random"
+
+url = <your api endpoint url>
+data = {"question": question, "unique_id":uniqueid}
+headers={"Content-type":"application/json", "Accept":"text/plan"}
+resp = requests.post(url_sql_gen, data=json.dumps(data), headers=headers)
+
+resp = requests.get(url_display)
+print('Generated SQL - ', resp[0]['sql])
+
+```
+
+## Using Webapp interface
+
+1. Launch the Web interface (either locally or in App engine - see above)
+2. Type your question in the Question input field and click Submit
+3. Generated SQL will be displayed below the question input field
+
+## Using Jupyter notebook
+
+## 
