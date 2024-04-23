@@ -663,7 +663,7 @@ class Nl2sqlBq:
                 "dataframe": df
             }
  
-    def generate_sql_with_join(self, dataset, table_1_name, table_2_name, question, example_table1, example_table2, sample_question=None, sample_sql=None, , one_shot=False, join_gen="STANDARD"):
+    def generate_sql_with_join(self, dataset, table_1_name, table_2_name, question, example_table1, example_table2, sample_question=None, sample_sql=None, one_shot=False, join_gen="STANDARD"):
         gen_join_sql = ""
         match join_gen:
             case 'STANDARD':
