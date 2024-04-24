@@ -61,7 +61,7 @@ def generate_metadata(project_id, location, dataset_name, model_name="text-bison
             columns[field.name] = column_dict
 
         data[table_name] = {
-            "Table Name": table_name,
+            "Name": table_name,
             "Description": table_description,
             "Columns": columns
         }

@@ -291,4 +291,4 @@ The approaches are
 | sample_question | Example question for on-shot |    Optional |
 | sample_sql | Example SQL for one-shot|    Optional |
 | one-shot | Boolean value True/False |    Default = False |
-| join_gen | Approach to take. STANDARD, MULTI_TURN, SELF_CORRECT |    Default=STANDARD |
+| join_gen | Approach to take. STANDARD, MULTI_TURN, SELF_CORRECT |    Default=STANDARD      |
