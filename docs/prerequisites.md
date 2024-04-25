@@ -1,4 +1,4 @@
-# Pre-requisites
+# Pre-requisites -- this is linked from the main Readme.
 
 ### PostgreSQL DB
 Create a PostGreSQL instance and DB in Cloud SQL
