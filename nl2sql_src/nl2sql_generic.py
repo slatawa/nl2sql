@@ -405,6 +405,40 @@ class Nl2sqlBq:
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
 
+    def execute_query(self,query, dry_run=False):
+        """
+        This function executes an SQL query using the configured BigQuery client.
+
+        Parameters:
+        - query (str): The SQL query to be executed.
+
+        Returns:
+        pandas.DataFrame: The result of the executed query as a DataFrame.
+        """
+        if dry_run:
+            job_config = client.QueryJobConfig(dry_run=True, use_query_cache=False)
+            query_job = client.query(query, job_config=job_config)
+            if query_job.total_bytes_processed >0 :
+                print("Query is valid")
+                return 'Query is valid'
+            else:
+                return 'Invalid query. Regenerate'
+        else:
+            try:
+                # Run the SQL query
+                query_job = client.query(query)
+
+                # Wait for the job to complete
+                query_job.result()
+
+                # Fetch the result if needed
+                results = query_job.to_dataframe()
+
+                return results
+            except Exception as exc:
+                raise Exception(traceback.print_exc()) from exc
+
+
     def text_to_sql_execute(self,question, table_name = None, logger_file = "log.txt"):
         "Converts text to sql and also executes sql query"
         try:
