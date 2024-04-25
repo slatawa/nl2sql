@@ -14,93 +14,10 @@ NL2SQL Library allows you to interact with your databases/datasets in BQ by leve
 
 
 [Prerequisities](prerequisites.md)
+
 [Modules and Descriptions](under_the_hood.md)
+
 [Deployment](deployment.md)
-
-
-## Pre-requisites
-
-### PostgreSQL DB
-Create a PostGreSQL instance and DB in Cloud SQL
-
-On Google Cloud Console -
-
-    Go to Cloud SQL
-    Click Create Instance
-    Select PostGreSQL
-    Specify the instance name and Password.  Note: username is default postgres
-
-    Once the instance is created,
-        Click on the instance
-        Click Databases
-        Click Create Database 
-    
-    Note the PostgreSQL Instance ID, DB and Password and specify in the environment variables mentioned below
-    
-### Dataset in BQ
-Create the Dataset and import the tables and data into BQ
-
-
-### Creating Metadata Cache file for your BQ dataset
-
-SQL Generation is dependent on the LLM knowing the tables and columns that are to be considered for generating the SQL.  The BQ dataset, tables and columns are different for each client requirement.  Description of the table and the columns in the table are required to be provided to the LLM for SQL query generation
-
-This data of tables, columns and their description are provided in JSON format in a file named **metadata_cache.json**.  This file is in the nl2sql_src/cache_metadata folder.
-
-In order to generate the metadata_cache.json for your project, 
-
-1. Open metadata_update_bq.py
-2. Update the *PROJECT_ID*  *DATASET* fields
-3. Go to nl2sql_generic/nl2sql_src folder
-4. Set the python environment and run 
-
-    ```code
-    python metadata_update_bq.py
-    ```
-
-
-### Environment Variables
-```bash
-PROJECT_ID='sl-test-project' # Update for your project
-REGION='us-central1'
-DATASET_NAME='sl-test-project.EY' # Update for your project
-DATASET_ID='EY' # Update for your project
-PROJECT_NUMBER='sl-test-project' # Update for your project
-PG_INSTANCE='test-nl2sql' # Update for your project
-PG_DB='test-db' # Update for your project
-PG_USER='postgres'
-PG_PWD='test-nl2sql' # Update for your project
-```
-
-## Modules and Descriptions
-
-### nl2sql_src
-
-nl2sql_src is the generic library for generating SQL. 
-
-#### Files
-
-**nl2sql_generic.py** is the main file with **Nl2sqlBq** as the main class used for generating SQL
-**nl2sql_query_embeddings.py** is used for creating embeddings for sample questions to be used as examples
-**Prompts.py** contains all the prompts used for identifying tables, generating SQL etc.,
-**metadata_update_bq.py** used to created the metadata_cache.json from BQ dataset
-
-
-### Notebooks
-1. Modify the nl2sql_runner_*.ipynb parameters to access the required resources on the project to generate the SQL
-2. nl2sql_vectordb_search.ipynb notebook can be used to create PostgreSQL table, insert records and retrieve closest matching queries.  Please ensure PostGreSQL instance and Database are already creted from console
-3. Others notebooks can be used for experienting and evaluating query generation
-
-### py-backend-api
-py-backend-api consists of backend services which are created using Python Flask library. This module converts the requests to generated SQL into backend apis. 
-
-**app.py** is the entry point.
-
-### WebApp
-
-webapp consists of Web application related resources.  API endpoints are mentioned in the .env.development, .env.production for development and production deployment respectively
-
-**Note** : Do not change the key names in the .env.* files. Only update the values (mostly app engine endpoints of backend deployment)
 
 
 

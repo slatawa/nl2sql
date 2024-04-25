@@ -1,7 +1,12 @@
 # Pre-requisites
+<div style="text-align: right">
 
-<details open>
+[Back](README.md)
+</div>
+
+<details>
 <summary>PostGreSQLDB</summary>
+
 ### PostgreSQL DB
 Create a PostGreSQL instance and DB in Cloud SQL
 
@@ -21,8 +26,9 @@ On Google Cloud Console -
 
 </details>
 
-<details open>
-<summary>Dataset in BQ</summary
+<details>
+<summary>Dataset in BQ</summary>
+
 ### Dataset in BQ
 Create the Dataset and import the tables and data into BQ
 
@@ -45,6 +51,9 @@ In order to generate the metadata_cache.json for your project,
     ```
 </details>
 
+<details>
+<summary>Environment Variables</summary>
+
 ### Environment Variables
 ```bash
 PROJECT_ID='sl-test-project' # Update for your project
@@ -57,3 +66,4 @@ PG_DB='test-db' # Update for your project
 PG_USER='postgres'
 PG_PWD='test-nl2sql' # Update for your project
 ```
+</details>
