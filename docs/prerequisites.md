@@ -1,5 +1,7 @@
-# Pre-requisites -- this is linked from the main Readme.
+# Pre-requisites
 
+<details open>
+<summary>PostGreSQLDB</summary>
 ### PostgreSQL DB
 Create a PostGreSQL instance and DB in Cloud SQL
 
@@ -16,7 +18,11 @@ On Google Cloud Console -
         Click Create Database 
     
     Note the PostgreSQL Instance ID, DB and Password and specify in the environment variables mentioned below
-    
+
+</details>
+
+<details open>
+<summary>Dataset in BQ</summary
 ### Dataset in BQ
 Create the Dataset and import the tables and data into BQ
 
@@ -37,7 +43,7 @@ In order to generate the metadata_cache.json for your project,
     ```code
     python metadata_update_bq.py
     ```
-
+</details>
 
 ### Environment Variables
 ```bash
