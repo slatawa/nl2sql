@@ -12,7 +12,7 @@ NL2SQL Library allows you to interact with your databases/datasets in BQ by leve
 5. Auto-verify generated SQL, execute and return results in natural language
 6. Chat based web UI for interacting with the library
 
-[Prerequisities][prerequisites.md]
+[Prerequisities](prerequisites.md)
 
 ## Pre-requisites
 
