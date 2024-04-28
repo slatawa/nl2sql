@@ -37,25 +37,12 @@ ___
 
 ### API Endpoints 
 
-**/api/sqlgen** is the end-point that is to be used to generate the SQL.  The natural lanaugage question is to be submitted to this endpoint via a POST Https method in Json format.  Required field : 
-
-"**question**"
-
-
-**/api/display** is used to display the latest question and the generated SQL for that question.  If there is an error in generaing the SQL for a given question, this API returns the SQL for the question if it exists in its list
-
-
-**/api/table/create** is the end-point to create a table in the PostGreSql DB.  Required field : 
-    
-"**table_name**"
-
-
-**/api/record/create** is the end-point to insert rows into the PostgreSQL table.  The inserted rows are example questions and corresponding SQLs that can be retrieved using similarity analysis for few-shot prompting in SQL generation. 
-Required fields :
-
-"**question**"
-
-"**sql**"
+| API Endpoint   |      Description      |  Required Fields |
+|-------------|:---------------------:|-------------------:|
+| **/api/sqlgen** |is the end-point that is to be used to generate the SQL.  The natural lanaugage question is to be submitted to this endpoint via a **POST** Https method in Json format. |**question** |  
+|**/api/display** | is used to display the latest question and the generated SQL for that question.  If there is an error in generaing the SQL for a given question, this API returns the SQL for the question if it exists in its list| - |
+ |**/api/table/create** |is the end-point to create a table in the PostGreSql DB.  |**table_name** | 
+ | **/api/record/create**| is the end-point to insert rows into the PostgreSQL table.  The inserted rows are example questions and corresponding SQLs that can be retrieved using similarity analysis for few-shot prompting in SQL generation. | **question**,  **sql**|
 
 ___
 
@@ -63,9 +50,9 @@ ___
 
 Refer [Quick Start Guide](QuickStart.md) for setting up the environment to use the NL2SQL library
 
-### Using HTTP APIs
+### 1. Using HTTP APIs
 
-#### Using PostMan client or other HTTP Clients
+#### 1.1 Using PostMan client or other HTTP Clients
 
 Steps to generate SQL
 1. In HTTP client (for ex. Postman), specify the URL (endpoint of App engine backend service or localhost if running the backend locally. Refer [Deployment](deployment.md) for details) and the select the method as POST
@@ -80,7 +67,7 @@ Status code should be 200 and the generated SQL will be available as output
 
 ___
 
-#### Using Python requests library
+#### 1.2 Using Python requests library
 
 ```code
 import requests
@@ -103,7 +90,7 @@ if resp.status == 200:
 ```
 
 
-### Using Webapp interface
+### 2. Using Webapp interface
 
 1. Launch the Web interface (either locally or in App engine - see above)
 2. Type your question in the Question input field and click Submit
@@ -111,9 +98,9 @@ if resp.status == 200:
 
 ___
 
-### Using Jupyter notebook
+### 3. Using Jupyter notebook
 
-### Normal queries
+#### 3.1 Normal queries
 
 1. Create a new Jupyter notebook or make a copy of nl2sql_runner.ipynb from notebooks folder
 
@@ -147,13 +134,13 @@ ___
 
 ___
 
-### Multi-turn Query Generation
+#### 3.2 Multi-turn Query Generation
 
 Refer [Multi-turn Chat](Multi-turn_chat.md) for details on using Multi-turn feature to generate queries with one **base question** and several **follow-up** questions
 
 ___
 
-### Generating SQL Queries with JOIN
+#### 3.3 Generating SQL Queries with JOIN
 
 Refer [Queries with Join](queries_with_joins.md) for more information on generating SQL queries with Joins and the different approaches for the same.
 
