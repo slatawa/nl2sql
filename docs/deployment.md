@@ -87,6 +87,9 @@ To deploy the application on App Engine, ensure you follow these prerequisites a
     ```bash
     gcloud app browse --service <servicename>
     ```
+
+Note the URL deployed in the App Engine dashboard for the backend service.  This is needed to update the API endpoint in the front-end application
+
 </details>
 
 <details>
@@ -102,12 +105,17 @@ To deploy the webapp application on App Engine, ensure you follow these prerequi
 
 3. **Project ID**: Verify that the deploy command in `package.json` is pointing to the correct project ID.
 
-4. Deploy the app on App Engine:
+4. Update **.env.production** file with the API endpoints of the backend service.  Following keys needs to be updated
+
+   * VITE_PUBLIC_QA_API_ENPOINT_1=*appengine backend service endpoint*/**api/sqlgen**
+   * VITE_PUBLIC_QA_API_ENPOINT_2=*appengine backend service endpoint*/**api/display**
+
+5. Deploy the app on App Engine:
    ```bash
    npm run deploy
    ```
 
-5. Use below command to get/launch the deployed app url. For example
+6. Use below command to get/launch the deployed app url. For example
     ```bash
     gcloud app browse --service <webapp>
     ```

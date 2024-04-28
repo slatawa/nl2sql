@@ -3,15 +3,16 @@
 
 ## Introduction
 
-NL2SQL Library allows you to interact with your databases/datasets in BQ by leverating Vertex AI LLMs on the Google Cloud. It helps generating SQL query statements from natural language questions.  Salient features of the library are
+NL2SQL Library allows you to interact with your databases/datasets in BQ by leveraging Vertex AI LLMs on Google Cloud. It helps generating SQL query statements from natural language questions.  Salient features of the library are
 
-1. Filter for tables required to generate the SQL for a given natural language statement
+1. Filtering tables required to generate the SQL for a given natural language statement
 2. Zero-shot or Few-shot prompting using vector embeddings and searching for closest matching queries
 3. Multi-turn SQL generation while retaining the context of the original statement
 4. Support for JOINs
 5. Auto-verify generated SQL, execute and return results in natural language
 6. Chat based web UI for interacting with the library
 
+___
 
 [Prerequisities](prerequisites.md)
 
@@ -19,121 +20,39 @@ NL2SQL Library allows you to interact with your databases/datasets in BQ by leve
 
 [Deployment](deployment.md)
 
+___
 
-
-
-## Starting Front-end and Back-end modules
-
-### Launching the back-end locally
-
-1. Navigate to the `py-backend-api` directory:
-   ```bash
-   cd py-backend-api
-   ```
-
-2. Create environment: 
-  - Use Python 3.10 (recommended using `pyenv` to install and manage Python versions)
-  - `python3 -m venv venv`
-  - `source venv/bin/activate`
-  
-3. Install the necessary dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the Backend server locally:
-   ```bash
-   flask run
-   ```
-   OR
-   ```bash
-   python app.py
-   ````
-
-   By default, the app will be running on [http://localhost:5000/](http://localhost:5000/).
-
-
-### Launching the front-end locally
-
-Follow these steps to start the development server on your local machine:
-
-1. Navigate to the `webapp` directory:
-
-   ```bash
-   cd webapp
-   ```
-2. Install the necessary dependencies:
-   ```bash
-   npm i
-   ```
-3. Run the UI server locally:
-   ```bash
-   npm run dev
-   ```
-   By default, the app will be running on [http://localhost:5173/](http://localhost:5173/).
-
-
-## Deploying the Application on App Engine
-
-### Deploying Back-end service
-
-To deploy the application on App Engine, ensure you follow these prerequisites and steps:
-
-1. **Permissions**: Make sure you have the required IAM permissions before deploying the app.
-
-2. **Update `app.yaml`**: If necessary, update the `app.yaml` file in the `py-backend-api` directory to reflect any specific deployment configurations.
-
-3. **Project ID**: Set the project ID.
-    ```
-    gcloud config set project [PROJECT_ID]
-    ```
-4. Deploy the app on App Engine:
-   ```bash
-   gcloud app deploy
-   ```
-5. Use below command to get/launch the deployed app url. For example
-    ```bash
-    gcloud app browse --service <servicename>
-    ```
-
-
-### Deploying Front-end service
-
-To deploy the webapp application on App Engine, ensure you follow these prerequisites and steps:
-
-1. **Permissions**: Make sure you have the required IAM permissions before deploying the app.
-
-2. **Update `app.yaml`**: If necessary, update the `app.yaml` file in the `webapp` directory to reflect any specific deployment configurations.
-
-3. **Project ID**: Verify that the deploy command in `package.json` is pointing to the correct project ID.
-
-4. Deploy the app on App Engine:
-   ```bash
-   npm run deploy
-   ```
-
-5. Use below command to get/launch the deployed app url. For example
-    ```bash
-    gcloud app browse --service <webapp>
-    ```
-    <webapp> is the deployed service name
-
+# Architecture
+___
 
 
 ## API Integration
 
 ### API Endpoints 
 
-**/api/sqlgen** is the end-point that is to be used to generate the SQL.  The natural lanaugage question is to be submitted to this endpoint via a POST Https method in Json format.  Required field : "**question**"
+**/api/sqlgen** is the end-point that is to be used to generate the SQL.  The natural lanaugage question is to be submitted to this endpoint via a POST Https method in Json format.  Required field : 
+
+"**question**"
+___
 
 **/api/display** is used to display the latest question and the generated SQL for that question.  If there is an error in generaing the SQL for a given question, this API returns the SQL for the question if it exists in its list
 
+___
 
-**/api/table/create** is the end-point to create a table in the PostGreSql DB.  Required field : "**table_name**"
+**/api/table/create** is the end-point to create a table in the PostGreSql DB.  Required field : 
+    
+"**table_name**"
+
+___
 
 **/api/record/create** is the end-point to insert rows into the PostgreSQL table.  The inserted rows are example questions and corresponding SQLs that can be retrieved using similarity analysis for few-shot prompting in SQL generation. 
-Required fields : "**question**", "**sql**"
+Required fields :
 
+"**question**"
 
+"**sql**"
+
+___
 
 # Generatiing SQL from Natural statements using the library
 
@@ -142,10 +61,12 @@ Required fields : "**question**", "**sql**"
 ### Using PostMan client or other HTTP Clients
 
 Steps to generate SQL
-1. In HTTP client (for ex. Postman), specify the URL (endpoint) and the select the method as POST
+1. In HTTP client (for ex. Postman), specify the URL (endpoint of App engine backend service or localhost if running the backend locally. [Refer](deployment.md) ) and the select the method as POST
 2. Click on Body, select 'raw' type and select JSON as the type
 3. specify {"question":"<youur question>, "unique_id":"<unique id - can be anyreference id>}
 4. Click Send
+
+___
 
 ### Using Python requests library
 
@@ -175,6 +96,8 @@ if resp.status == 200:
 1. Launch the Web interface (either locally or in App engine - see above)
 2. Type your question in the Question input field and click Submit
 3. Generated SQL will be displayed below the question input field
+
+___
 
 ## Using Jupyter notebook
 

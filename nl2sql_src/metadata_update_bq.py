@@ -1,4 +1,5 @@
 import json
+import os
 from google.cloud import bigquery
 import vertexai
 from vertexai.language_models import TextGenerationModel
@@ -69,8 +70,8 @@ def generate_metadata(project_id, location, dataset_name, model_name="text-bison
     return data
 
 if __name__ == "__main__":
-    PROJECT_ID = 'cdii-poc'
-    DATASET = "cdii-poc.HHS_Program_Counts"
+    PROJECT_ID = os.environ.get('PROJECT_ID') #'sl-test--project'
+    DATASET = os.environ.get('DATASET_NAME') # "sl-test--project.zoominfo"
     OUTPUTFILE = "./cache_metadata/metadata_cache.json"
 
     metadata = generate_metadata(
