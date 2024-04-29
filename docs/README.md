@@ -24,7 +24,9 @@ ___
 
 ## Architecture
 
-*Architecture diagrams to be embedded here*
+
+
+![Nl2SqlLibrary Archiecture](nl2sql_generic_library_arch.png)
 ___
 
 ## Quick Start Guide
