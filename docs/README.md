@@ -75,8 +75,8 @@ ___
 import requests
 import json
 
-url_sql_gen = '<your quuestion here>/api/sqlgen'
-url_display = '<your quuestion here>/api/display'
+url_sql_gen = '<your base url here>/api/sqlgen'
+url_display = '<your base url here>/api/display'
 
 uniqueid="unique id -- can be random"
 question = <your question>
@@ -94,8 +94,12 @@ if resp.status == 200:
 
 ### 2. Using Webapp interface
 
-1. Launch the Web interface (either locally or in App engine - see [Deployment](deployment.md) )
-2. Type your question in the Question input field and click Submit
+1. Launch the Web interface (either locally or in App engine - see [Deployment](deployment.md) ).  UI is as shown
+
+![NL2SQL UI](NL2SQL_UI.png)
+
+2. Type your question in the Question input field and click Search
+
 3. Generated SQL will be displayed below the question input field
 
 ___

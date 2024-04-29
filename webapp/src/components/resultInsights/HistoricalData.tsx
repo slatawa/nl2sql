@@ -162,7 +162,7 @@ const HistoricalData: React.FC<HistoricalProps> = ({
     <>
       <div className="my-4">
         <div className="text-primary flex text-5xl font-semibold">
-          Hello, EY Executive
+          Hello, Data Analysis Executive
         </div>
         <div className="text-base-content mt-4 flex text-3xl font-semibold opacity-60">
           How can I help you today?

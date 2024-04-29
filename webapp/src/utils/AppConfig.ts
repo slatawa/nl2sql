@@ -32,7 +32,7 @@ const CUSTOMER_APPROVED_EMAILS: RegExp[] = [
 
 // Make sure you update your public/locales JSON files
 export const AppConfig: IAppConfig = {
-  siteName: "EY POC",
+  siteName: "NL2SQL POC",
   locale: "en",
   logoPath: "/assets/images/google.png",
   simpleLogoPath: "/assets/images/google.png",
