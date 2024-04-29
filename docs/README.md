@@ -5,9 +5,9 @@
 
 NL2SQL Library allows you to interact with your databases/datasets in BQ by leveraging Vertex AI LLMs on Google Cloud. It helps generating SQL query statements from natural language questions.  Salient features of the library are
 
-1. Filtering tables required to generate the SQL for a given natural language statement
+1. Infer Schema by filtering tables required to generate the SQL for a given natural language statement
 2. Zero-shot or Few-shot prompting using vector embeddings and searching for closest matching queries
-3. Multi-turn SQL generation while retaining the context of the original statement
+3. Multi-turn SQL generation while retaining the context of the original input statement
 4. Support for JOINs
 5. Auto-verify generated SQL, execute and return results in natural language
 6. Chat based web UI for interacting with the library

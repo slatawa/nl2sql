@@ -7,7 +7,7 @@
 ## Starting Front-end and Back-end modules
 
 <details>
-<summary>Launching the back-end locally</summary>
+<summary style="font-size:23px;">Launching the back-end locally</summary>
 
 ### Launching the back-end locally
 
@@ -17,10 +17,16 @@
    ```
 
 2. Create environment: 
-  - Use Python 3.10 (recommended using `pyenv` to install and manage Python versions)
-  - `python3 -m venv venv`
-  - `source venv/bin/activate`
-  
+
+- Use Python 3.10 (recommended using `pyenv` to install and manage Python versions)
+
+   ```bash
+   python3 -m venv venv
+   ```
+   ```bash
+   source venv/bin/activate
+   ```
+
 3. Install the necessary dependencies:
    ```bash
    pip install -r requirements.txt
@@ -33,13 +39,22 @@
    ```bash
    python app.py
    ````
+   OR
+   ```bash
+   flask --app app.py run
+   ````
 
    By default, the app will be running on [http://localhost:5000/](http://localhost:5000/).
+
+5. The backend local launch will look like below
+
+   ![Local backend](local_backend_run.png)
+
 
 </details>
 
 <details>
-<summary>Launching the front-end locally</summary>
+<summary style="font-size:23px;">Launching the front-end locally</summary>
 
 ### Launching the front-end locally
 
@@ -52,20 +67,32 @@ Follow these steps to start the development server on your local machine:
    ```
 2. Install the necessary dependencies:
    ```bash
-   npm i
+   npm 
    ```
-3. Run the UI server locally:
+
+3. Ensure the .env.development file is updated with the API endpoints (either local / deployed on App Engine / other) for the following two keys
+
+   ```
+   VITE_PUBLIC_QA_API_ENPOINT_1=http://127.0.0.1:5000/api/sqlgen
+   VITE_PUBLIC_QA_API_ENPOINT_2=http://127.0.0.1:5000/api/display
+   ```
+   Value shown above is that of API endpoint running locally. This can be pointed to other endpoints depending on the deployment
+
+4. Run the UI server locally:
    ```bash
    npm run dev
    ```
    By default, the app will be running on [http://localhost:5173/](http://localhost:5173/).
 
+5. Local front-end development server run will be as shown
+
+   ![Local backend](local_frontend_run.png)
 </details>
 
 ## Deploying the Application on App Engine
 
 <details>
-<summary>Deploying the Back-end service</summary>
+<summary style="font-size:23px;">Deploying the Back-end service</summary>
 
 ### Deploying Back-end service
 
@@ -93,7 +120,7 @@ Note the URL deployed in the App Engine dashboard for the backend service.  This
 </details>
 
 <details>
-<summary>Deploying the front-end service</summary>
+<summary style="font-size:23px;">Deploying the front-end service</summary>
 
 ### Deploying Front-end service
 
@@ -107,8 +134,10 @@ To deploy the webapp application on App Engine, ensure you follow these prerequi
 
 4. Update **.env.production** file with the API endpoints of the backend service.  Following keys needs to be updated
 
-   * VITE_PUBLIC_QA_API_ENPOINT_1=*appengine backend service endpoint*/**api/sqlgen**
-   * VITE_PUBLIC_QA_API_ENPOINT_2=*appengine backend service endpoint*/**api/display**
+   ```
+   VITE_PUBLIC_QA_API_ENPOINT_1=*appengine backend service endpoint*/**api/sqlgen**
+   VITE_PUBLIC_QA_API_ENPOINT_2=*appengine backend service endpoint*/**api/display**
+   ```
 
 5. Deploy the app on App Engine:
    ```bash
