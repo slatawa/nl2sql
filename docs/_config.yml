@@ -1,5 +1,5 @@
-title: NL2SQL Generic Library
-markdown: kramdown
-permalink: /:year/:title:output_ext
+# title: NL2SQL Generic Library
+# markdown: kramdown
+# permalink: /:year/:title:output_ext
 remote_theme: jekyll/minima
 markdown: GFM

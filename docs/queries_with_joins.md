@@ -40,6 +40,6 @@ The approaches are
     PROJECT_ID
     DATASET_ID
     ```
-3. Uddate the variables to specify the examples (NL statement, SQL with join, Tables) in the notebook 
+3. Update the variables to specify the examples (NL statement, SQL with join, Tables) in the notebook 
 
 3. Run the cells in the notebook to verify SQL with Join generation

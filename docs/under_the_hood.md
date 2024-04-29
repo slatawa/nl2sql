@@ -1,10 +1,66 @@
-# Under the hood - design and architecture
+# Under the hood - Module organisation
 <div style="text-align: right">
 
 [Back](README.md)
 </div>
 
 ## Modules and Descriptions
+
+### Folder structure
+
+Important folders and files in the library are shown in the structure below.  
+```
+./nl2sql_generic
+├── nl2sql_src
+  └── __init__.py
+  └── nl2sql_generic.py
+  └── metadata_update_bq.py
+  └── nl2sql_query_embeddings.py
+  └── prompts.py
+  └── test.py
+  └── cache_metadata
+    └── metadata_cache.json
+    └── saved_index_pgdata
+  └── data_dict
+    └── data_dictionary.json
+  └── dataset
+  └── output
+  └── utils
+    └── mmake_data_dict.py
+    └── table_filter_test.py
+└── notebooks
+  └── nl2sql_runner.ipynb
+  └── nl2sql_vectordb_search.ipynb
+  └── nl2sql_multi-turn.ipynb
+  └── nl2sql_sql_with_joins.ipynb
+  └── <other temp notebooks>
+└── py-backend-api
+  └── app.py
+  └── app.yaml
+  └── requirements.txt
+  └── <other temp files>
+└── webapp*
+  └── src*
+    └── components
+        └── resultsInsights
+            └── HistoricalData.tsx
+            └── InfoModal.tsx
+            └── ResultData.tsx
+            └── ResultDataDisplay.tsx
+  └── functions
+  └── scripts
+  └── app.yaml
+  └── .env.development
+  └── .env.production
+  └── package.json
+  └── index.html
+  └── Dockerfile
+  └── vite config.ts
+
+```
+There are several other folders in the file organisation that is not depicted above 
+
+___
 
 ### nl2sql_src
 
