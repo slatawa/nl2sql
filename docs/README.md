@@ -18,13 +18,13 @@ ___
 
 [Modules and Descriptions](under_the_hood.md)
 
-[Deployment](deployment.md)
+[Executing the Library code](deployment.md)
 
 ___
 
 ## Architecture
 
-Architecture diagrams to be embedded here
+*Architecture diagrams to be embedded here*
 ___
 
 ## Quick Start Guide
@@ -40,9 +40,9 @@ ___
 | API Endpoint   |      Description      |  Required Fields |
 |-------------|:---------------------:|-------------------:|
 | **/api/sqlgen** |is the end-point that is to be used to generate the SQL.  The natural lanaugage question is to be submitted to this endpoint via a **POST** Https method in Json format. |**question** |  
-|**/api/display** | is used to display the latest question and the generated SQL for that question.  If there is an error in generaing the SQL for a given question, this API returns the SQL for the question if it exists in its list| - |
- |**/api/table/create** |is the end-point to create a table in the PostGreSql DB.  |**table_name** | 
- | **/api/record/create**| is the end-point to insert rows into the PostgreSQL table.  The inserted rows are example questions and corresponding SQLs that can be retrieved using similarity analysis for few-shot prompting in SQL generation. | **question**,  **sql**|
+|**/api/display** | is used to display the latest question and the generated SQL for that question.  If there is an error in generaing the SQL for a given question, this API returns the SQL for the question if it exists in its list. Method = **GET**| - |
+ |**/api/table/create** |is the end-point to create a table in the PostGreSql DB. Method = **POST**  |**table_name** | 
+ | **/api/record/create**| is the end-point to insert rows into the PostgreSQL table.  The inserted rows are example questions and corresponding SQLs that can be retrieved using similarity analysis for few-shot prompting in SQL generation. Method = **POST** | **question**,  **sql**|
 
 ___
 
@@ -92,7 +92,7 @@ if resp.status == 200:
 
 ### 2. Using Webapp interface
 
-1. Launch the Web interface (either locally or in App engine - see above)
+1. Launch the Web interface (either locally or in App engine - see [Deployment](deployment.md) )
 2. Type your question in the Question input field and click Submit
 3. Generated SQL will be displayed below the question input field
 
