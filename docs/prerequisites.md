@@ -1,3 +1,5 @@
+<title>Prerequisites</title>
+
 # Pre-requisites
 <div style="text-align: right">
 
