@@ -68,7 +68,7 @@ students answer: {llm_amswer}
 
 
 Sql_Generation_prompt = '''
-Only use the following tables meta-data:
+Only use the following table's meta-data:
 
 ```
 Table Name : {table_name}
@@ -82,10 +82,11 @@ This table has the following columns :
 
 You are an SQL expert at generating SQL queries from a natural language question. Given the input question, create a syntactically correct Biguery query to run.
 
-Only use the few relevant columns given the question.
+Only use the few relevant columns for the given question.
 Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
 Please think step by step and always validate the reponse.
-recitify each column names by referencing them from the meta-data.
+Generate SQL with Join only when 2 tables are involved
+Rectify each column names by referencing them from the meta-data.
 
 For this question what would be the most accurate SQL query?
 Question: {question}
@@ -109,7 +110,8 @@ You are an SQL expert at generating SQL queries from a natural language question
 Only use the few relevant columns given in the question.
 Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
 Please think step by step and always validate the reponse.
-recitify each column names by referencing them from the meta-data.
+Rectify each column names by referencing them from the meta-data.
+Generate SQL with Join only when 2 tables are involved
 Use the following examples as guidelines to generate the new BigQuery SQL accordingly
 
 {few_shot_examples}

@@ -21,9 +21,9 @@ class TestGenerateMetadata(unittest.TestCase):
         ]
 
         metadata = generate_metadata(
-            project_id="cdii-poc",  # Replace with your project ID
+            project_id="sl-test-project-363109",  # Replace with your project ID
             location="us-central1",    # Replace with your Vertex AI location
-            dataset_name="cdii-poc.qnadb"
+            dataset_name="sl-test-project-363109.qnadb"
         )
 
         print(f"Generated Metadata:\n{metadata}") 

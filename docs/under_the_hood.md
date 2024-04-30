@@ -60,7 +60,6 @@ Important folders and files in the library are shown in the structure below.
 ```
 There are several other folders in the file organisation that is not depicted above 
 
-___
 
 ### nl2sql_src
 

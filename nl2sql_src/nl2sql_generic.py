@@ -42,7 +42,6 @@ class Nl2sqlBq:
             self.metadata_json = json.loads(f.read())
 
     def init_pgdb(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, index_file='saved_index_pgdata'):
-        # self.pge = PgSqlEmb("cdii-poc", "us-central1", "cdii-demo-temp", "demodbcdii", "postgres", "cdii-demo")
         self.pge = PgSqlEmb(proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd)
 
     def get_all_table_names(self):
@@ -141,6 +140,7 @@ class Nl2sqlBq:
                 {self.metadata_json[table]['Description']}\n"
 
         prompt = Table_filtering_prompt.format(only_tables_info = only_tables_info, question = question)
+        # print("Table filter prompt = ", prompt)
 
         result = self.llm.invoke(prompt)
         #print(result)
@@ -223,8 +223,10 @@ class Nl2sqlBq:
         str: Modified SQL query with the specified dataset prefix 
         added to the tables in the FROM clause.
         """
+
         dataset = self.dataset_id
         if sql_query:
+            sql_query = sql_query.replace('`', '')
             # Define a regular expression pattern to match the FROM clause
             pattern = re.compile(r'\bFROM\b\s+(\w+)', re.IGNORECASE)
 
@@ -233,22 +235,28 @@ class Nl2sqlBq:
 
             # Iterate through matches and replace the table name
             for match in matches:
+                # check text following the match if it is a complete table name 
                 next_text = sql_query.split(match)[1].split('\n')[0]
                 next_text = next_text.split(' ')[0]
+
                 # Check if the previous word is not DAY, YEAR, or MONTH
                 if re.search(r'\b(?:DAY|YEAR|MONTH)\b',
                              sql_query[:sql_query.find(match)], re.IGNORECASE) is None:
+                
                     # Replace the next word after FROM with dataset.table
                     if match == dataset.split('.')[0]: # checking if in generated SQL, table includes the project-id and dataset or not
                         replacement = f'`{match}'
                     else:
-                        replacement = f'{dataset}.`{match}`'
+                        sql_query = sql_query.replace(next_text, '')
+                        replacement = f'{dataset}.`{match}{next_text}`'
 
                     # replacement = f'{dataset}.{match}'
                     sql_query = re.sub(r'\bFROM\b\s+' + re.escape(match),
                                         f'FROM {replacement}', sql_query, flags=re.IGNORECASE)
                     if match == dataset.split('.')[0]:
+                        print("replacing again")
                         sql_query = sql_query.replace(f'{match}{next_text}', f'{match}{next_text}`')
+            
             sql_query = sql_query.replace('CAST', 'SAFE_CAST')
             sql_query = sql_query.replace('SAFE_SAFE_CAST', 'SAFE_CAST')
             return sql_query
@@ -266,6 +274,7 @@ class Nl2sqlBq:
                     table_name = table_list[0]
                 else:
                     table_name = list(self.metadata_json.keys())[0]
+
             table_json = self.metadata_json[table_name]
             columns_json = table_json["Columns"]
             columns_info = ""
@@ -277,10 +286,10 @@ class Nl2sqlBq:
             sql_prompt = Sql_Generation_prompt.format(table_name = table_json["Name"], 
                                                       table_description = table_json["Description"],
                                                       columns_info = columns_info, question = question)
-            #print(sql_prompt)
+            # print(sql_prompt)
             response = self.llm.invoke(sql_prompt)
             sql_query = response.replace('sql', '').replace('```', '')
-            sql_query = self.case_handler_transform(sql_query)
+            # sql_query = self.case_handler_transform(sql_query)
             sql_query = self.add_dataset_to_query(sql_query)
             with open(logger_file, 'a',encoding="utf-8") as f:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
@@ -381,7 +390,7 @@ class Nl2sqlBq:
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
 
-    def execute_query(self,query):
+    def execute_query_old(self,query):
         """
         This function executes an SQL query using the configured BigQuery client.
 
@@ -416,13 +425,13 @@ class Nl2sqlBq:
         pandas.DataFrame: The result of the executed query as a DataFrame.
         """
         if dry_run:
-            job_config = client.QueryJobConfig(dry_run=True, use_query_cache=False)
+            job_config = bigquery.QueryJobConfig(dry_run=True, use_query_cache=False)
             query_job = client.query(query, job_config=job_config)
-            if query_job.total_bytes_processed >0 :
+            if query_job.total_bytes_processed > 0 :
                 print("Query is valid")
-                return 'Query is valid'
+                return True, 'Query is valid'
             else:
-                return 'Invalid query. Regenerate'
+                return False, 'Invalid query. Regenerate'
         else:
             try:
                 # Run the SQL query
@@ -438,11 +447,24 @@ class Nl2sqlBq:
             except Exception as exc:
                 raise Exception(traceback.print_exc()) from exc
 
+    def self_reflection(self, question, query, max_tries=5):
+        status, msg = self.execute_query(query, dry_run=True)
+        good_sql = False
+        if not status:
+            # Repeat generation of the sql
+            iter = 0;
+            while iter < max_tries or good_sql:
+                prompt = self.generate_sql_few_shot_promptonly(question, table_name="", prev_sql=query)
+                query = self.invoke_llm(prompt)
+                good_sql, msg = self.execute_query(query, dry_run=True)
+                iter+=1
+        return good_sql
 
     def text_to_sql_execute(self,question, table_name = None, logger_file = "log.txt"):
         "Converts text to sql and also executes sql query"
         try:
-            query = self.text_to_sql(question,table_name,logger_file = logger_file)
+            # query = self.text_to_sql(question,table_name,logger_file = logger_file)
+            query = self.generate_sql(question,table_name,logger_file = logger_file)
             print(query)
             results = self.execute_query(query)
             return results
@@ -762,12 +784,12 @@ if __name__ == '__main__':
     table_identified = nl2sqlbq_client.table_filter(question)
     print("Table Identified - app.py = ", table_identified)
 
-    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGPROJ = os.environ['PROJECT_ID'] #"sl-test-project-363109"
     PGLOCATION = os.environ['REGION'] #'us-central1'
-    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
-    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"nl2sql-test"
+    PGDB = os.environ['PG_DB'] #"test-db"
     PGUSER = os.environ['PG_USER'] #"postgres"
-    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    PGPWD = os.environ['PG_PWD'] #"nl2sql-test"
 
     nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
     sql_query, _ = nl2sqlbq_client.text_to_sql_execute_few_shot(question, 'medi-cal-and-calfresh-enrollment')

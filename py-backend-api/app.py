@@ -75,12 +75,12 @@ def genai_sqlgen():
     print("Table Identified - app.py = ", table_identified)
 
     result_sql = ""
-    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGPROJ = os.environ['PROJECT_ID'] #"sl-test-project-363109"
     PGLOCATION = os.environ['REGION'] #'us-central1'
-    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
-    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"nl2sql-test"
+    PGDB = os.environ['PG_DB'] #"test-deb"
     PGUSER = os.environ['PG_USER'] #"postgres"
-    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    PGPWD = os.environ['PG_PWD'] #"nl2sql-test"
 
     nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
     sql_query, result_sql = nl2sqlbq_client.text_to_sql_execute_few_shot(question)
@@ -143,12 +143,12 @@ def howto():
 @app.route('/api/table/create', methods=['POST'])
 def create_pgtable():
     table_name = request.json['table_name']
-    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGPROJ = os.environ['PROJECT_ID'] #"sl-test-project-363109"
     PGLOCATION = os.environ['REGION'] #'us-central1'
-    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
-    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"nl2sql-test"
+    PGDB = os.environ['PG_DB'] #"test-db"
     PGUSER = os.environ['PG_USER'] #"postgres"
-    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    PGPWD = os.environ['PG_PWD'] #"nl2sql-test"
     pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
     pge.create_table(table_name)
 
@@ -157,12 +157,12 @@ def create_pgtable_record():
     question = request.json['question']
     mappedsql = request.json['sql']
 
-    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGPROJ = os.environ['PROJECT_ID'] #"sl-test-project-363109"
     PGLOCATION = os.environ['REGION'] #'us-central1'
-    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
-    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"nl2sql-test"
+    PGDB = os.environ['PG_DB'] #"test-db"
     PGUSER = os.environ['PG_USER'] #"postgres"
-    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    PGPWD = os.environ['PG_PWD'] #"nl2sql-test"
     pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
     pge.insert_row(question, mappedsql)
 
