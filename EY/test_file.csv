@@ -1,7 +1,0 @@
-table, question, ground_truth_sql
-invoice_specific, What resources / resource types are driving cost increase in SAP Non-Prod?, sql
-invoice_specific, What products are driving cost increase in SAP Non-Prod?, sql
-invoice_specific, What are the deployment ids generating more cost in SAP Non-Prod?, sql
-invoice_specific, What projects are impacting my engagement code E-67747458?, sql
-invoice_specific, How can I reduce the cost for SAP Non-Prod?, sql
-invoice_specific, How much will I spend by end of FY considering current consumption for SAP Non-Prod?, sql
