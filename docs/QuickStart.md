@@ -61,8 +61,10 @@ ___
 
 1. Open the notebook nl2slql_runner.ipynb
 
-2. Change the PROJECT_ID and DATASET_ID according your project
+2. Change the **PROJECT_ID** and **DATASET_ID** according to your project
 
 3. Update the question
 
-4. Required the cells and observe the output
+4. Execute the cells and observe the output
+
+
