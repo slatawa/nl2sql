@@ -1,0 +1,6 @@
+name: Natural Language to SQL
+title: null
+# markdown: kramdown
+# permalink: /:year/:title:output_ext
+remote_theme: jekyll/minima
+markdown: GFM
