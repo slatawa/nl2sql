@@ -42,7 +42,6 @@ class Nl2sqlBq:
             self.metadata_json = json.loads(f.read())
 
     def init_pgdb(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, index_file='saved_index_pgdata'):
-        # self.pge = PgSqlEmb("cdii-poc", "us-central1", "cdii-demo-temp", "demodbcdii", "postgres", "cdii-demo")
         self.pge = PgSqlEmb(proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd)
 
     def get_all_table_names(self):
@@ -785,12 +784,12 @@ if __name__ == '__main__':
     table_identified = nl2sqlbq_client.table_filter(question)
     print("Table Identified - app.py = ", table_identified)
 
-    PGPROJ = os.environ['PROJECT_ID'] #"cdii-poc"
+    PGPROJ = os.environ['PROJECT_ID'] #"sl-test-project-363109"
     PGLOCATION = os.environ['REGION'] #'us-central1'
-    PGINSTANCE = os.environ['PG_INSTANCE'] #"cdii-demo-temp"
-    PGDB = os.environ['PG_DB'] #"demodbcdii"
+    PGINSTANCE = os.environ['PG_INSTANCE'] #"nl2sql-test"
+    PGDB = os.environ['PG_DB'] #"test-db"
     PGUSER = os.environ['PG_USER'] #"postgres"
-    PGPWD = os.environ['PG_PWD'] #"cdii-demo"
+    PGPWD = os.environ['PG_PWD'] #"nl2sql-test"
 
     nl2sqlbq_client.init_pgdb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
     sql_query, _ = nl2sqlbq_client.text_to_sql_execute_few_shot(question, 'medi-cal-and-calfresh-enrollment')
