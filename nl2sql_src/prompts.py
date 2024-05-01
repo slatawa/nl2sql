@@ -138,7 +138,7 @@ You are an SQL expert at generating SQL queries from a natural language question
 Only use the few relevant columns given in the question.
 Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table. Do not use more than 10 columns in the query. Focus on the keywords indicating calculation. 
 Please think step by step and always validate the reponse.
-recitify each column names by referencing them from the meta-data.
+rectify each column names by referencing them from the meta-data.
 Use the following examples as guidelines to generate the new BigQuery SQL accordingly
 
 {few_shot_examples}
@@ -157,6 +157,7 @@ SQL Query : {prev_sql}
 The question given below is a follow-up question for an already answered question
 The SQL query statement that needs to be generated will be a modification or enhancement to the SQL Query statement given above
 Enhance the above given SQL query to fulfil the requirements of the question given below
+Consider only the table given in the above SQL to generate the query.
 """
 
 Table_info_template = """
