@@ -41,8 +41,8 @@ class Nl2sqlBq:
             f = open(metadata_json_path, encoding="utf-8")
             self.metadata_json = json.loads(f.read())
 
-    def init_pgdb(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, index_file='saved_index_pgdata'):
-        self.pge = PgSqlEmb(proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd)
+    def init_pgdb(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, pg_table, index_file='saved_index_pgdata'):
+        self.pge = PgSqlEmb(proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, pg_table)
 
     def get_all_table_names(self):
         "Provides list of table names in dataset"
@@ -329,7 +329,7 @@ class Nl2sqlBq:
             sql_prompt = Sql_Generation_prompt_few_shot.format(table_name = table_json["Name"], 
                                                       table_description = table_json["Description"],
                                                       columns_info = columns_info, few_shot_examples = few_shot_examples, question = question)
-            #print(sql_prompt)
+            # print(sql_prompt)
             response = self.llm.invoke(sql_prompt)
             sql_query = response.replace('sql', '').replace('```', '')
             
@@ -449,16 +449,16 @@ class Nl2sqlBq:
 
     def self_reflection(self, question, query, max_tries=5):
         status, msg = self.execute_query(query, dry_run=True)
-        good_sql = False
+        isgood_sql = False
         if not status:
             # Repeat generation of the sql
             iter = 0;
-            while iter < max_tries or good_sql:
+            while iter < max_tries or isgood_sql:
                 prompt = self.generate_sql_few_shot_promptonly(question, table_name="", prev_sql=query)
                 query = self.invoke_llm(prompt)
-                good_sql, msg = self.execute_query(query, dry_run=True)
+                isgood_sql, msg = self.execute_query(query, dry_run=True)
                 iter+=1
-        return good_sql
+        return isgood_sql, query
 
     def text_to_sql_execute(self,question, table_name = None, logger_file = "log.txt"):
         "Converts text to sql and also executes sql query"
