@@ -55,7 +55,7 @@ class Nl2Sql_embed():
     #     # Generate BERT embeddings for documents
     #     embeddings = model.encode(documents)
 
-        return embeddings
+        # return embeddings
     
     def insert_data(self, question, sql):
         print(question, sql)
@@ -138,7 +138,7 @@ class Nl2Sql_embed():
 
 class PgSqlEmb():
     
-    def __init__(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, index_file='saved_index_pgdata'):
+    def __init__(self, proj_id, loc, pg_inst, pg_db, pg_uname, pg_pwd, pg_table='documents', index_file='saved_index_pgdata'):
         # Init function
         # self.EMBEDDING_FILE = "embeddings.json"
 
@@ -149,6 +149,7 @@ class PgSqlEmb():
         self.USER = pg_uname
         self.PWD = pg_pwd
         self.PGDB = pg_db 
+        self.PGTABLE = pg_table
         
         # self.INDEX_FILE = 'saved_index_pgdata'
         self.INDEX_FILE = f"../../nl2sql-generic/nl2sql_src/cache_metadata/{index_file}"
@@ -178,8 +179,8 @@ class PgSqlEmb():
             )
         return pool
     
-    def create_table(self, table_name='documents'):
-        sql_create = f"""CREATE TABLE IF NOT EXISTS {table_name} (
+    def create_table(self):
+        sql_create = f"""CREATE TABLE IF NOT EXISTS {self.PGTABLE} (
              q_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
              question TEXT,
              sql TEXT,
@@ -189,7 +190,7 @@ class PgSqlEmb():
             conn.execute(sql_create)
 
     def empty_table(self, remove_index=True):
-        sql_clear = 'DELETE from documents'
+        sql_clear = f'DELETE from {self.PGTABLE}'
         with self.pool.connect() as conn:
             conn.execute(sql_clear)
         if remove_index:
@@ -205,7 +206,7 @@ class PgSqlEmb():
         sql = sql.replace('"', '<dq>')
         emb = self.embedding_model.get_embeddings([query])[0].values
         
-        sql_ins = f"INSERT INTO documents (question, sql, query_embedding) values ('{query}', '{sql}', '{emb}')"
+        sql_ins = f"INSERT INTO {self.PGTABLE} (question, sql, query_embedding) values ('{query}', '{sql}', '{emb}')"
         with self.pool.connect() as conn:
             conn.execute(sql_ins)
             
@@ -213,7 +214,7 @@ class PgSqlEmb():
             
             
     def extract_data(self):
-        sql_data = 'SELECT * FROM documents'
+        sql_data = f'SELECT * FROM {self.PGTABLE}'
         with self.pool.connect() as conn:
             data = conn.execute(sql_data)
         return data
@@ -276,7 +277,7 @@ class PgSqlEmb():
         emb = self.embedding_model.get_embeddings([query])[0].values
         new_array = [emb]        
 
-        print(len(new_array), 'length of new array')
+        # print(len(new_array), 'length of new array')
         
         embeddings_data_array = np.asarray(new_array, dtype=np.float32)
         
