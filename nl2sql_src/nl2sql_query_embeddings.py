@@ -55,7 +55,7 @@ class Nl2Sql_embed():
     #     # Generate BERT embeddings for documents
     #     embeddings = model.encode(documents)
 
-        return embeddings
+        # return embeddings
     
     def insert_data(self, question, sql):
         print(question, sql)
@@ -188,8 +188,8 @@ class PgSqlEmb():
         with self.pool.connect() as conn:
             conn.execute(sql_create)
 
-    def empty_table(self, remove_index=True):
-        sql_clear = 'DELETE from documents'
+    def empty_table(self, table_name='documents', remove_index=True):
+        sql_clear = f'DELETE from {table_name}'
         with self.pool.connect() as conn:
             conn.execute(sql_clear)
         if remove_index:
@@ -199,27 +199,27 @@ class PgSqlEmb():
                 pass
             
             
-    def insert_row(self,query, sql):
+    def insert_row(self,query, sql, table_name="documents"):
         
         sql = sql.replace("'", "<sq>")
         sql = sql.replace('"', '<dq>')
         emb = self.embedding_model.get_embeddings([query])[0].values
         
-        sql_ins = f"INSERT INTO documents (question, sql, query_embedding) values ('{query}', '{sql}', '{emb}')"
+        sql_ins = f"INSERT INTO {table_name} (question, sql, query_embedding) values ('{query}', '{sql}', '{emb}')"
         with self.pool.connect() as conn:
             conn.execute(sql_ins)
             
         self.update_vectordb_index(query)
             
             
-    def extract_data(self):
-        sql_data = 'SELECT * FROM documents'
+    def extract_data(self, table_name='documents'):
+        sql_data = f'SELECT * FROM {table_name}'
         with self.pool.connect() as conn:
             data = conn.execute(sql_data)
         return data
 
-    def extract_pg_embeddings(self):
-        tmp = self.extract_data()
+    def extract_pg_embeddings(self, table_name='documents'):
+        tmp = self.extract_data(table_name)
         df = DataFrame(tmp.fetchall())
         
         q_embed = df['query_embedding']
@@ -243,8 +243,8 @@ class PgSqlEmb():
             
         return df['question'], df['sql'], new_array
         
-    def recreate_vectordb_index(self):
-        tmp = self.extract_data()
+    def recreate_vectordb_index(self, table_name='documents'):
+        tmp = self.extract_data(table_name)
         df = DataFrame(tmp.fetchall())
         
         q_embed = df['query_embedding']
@@ -276,7 +276,7 @@ class PgSqlEmb():
         emb = self.embedding_model.get_embeddings([query])[0].values
         new_array = [emb]        
 
-        print(len(new_array), 'length of new array')
+        # print(len(new_array), 'length of new array')
         
         embeddings_data_array = np.asarray(new_array, dtype=np.float32)
         
@@ -292,8 +292,8 @@ class PgSqlEmb():
         return
 
     
-    def search_matching_queries(self, new_query):
-        tmp = self.extract_data()
+    def search_matching_queries(self, new_query, table_name='documents'):
+        tmp = self.extract_data(table_name)
         df = DataFrame(tmp.fetchall())
         
         q_embed = df['query_embedding']
