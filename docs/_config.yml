@@ -1,6 +1,6 @@
-name: Natural Language to SQL
+name: ""
 title: null
 # markdown: kramdown
 # permalink: /:year/:title:output_ext
-remote_theme: jekyll/minima
+remote_theme: jekyll/cayman
 markdown: GFM
