@@ -2,5 +2,5 @@ name: ""
 title: null
 # markdown: kramdown
 # permalink: /:year/:title:output_ext
-remote_theme: jekyll/cayman
+remote_theme: jekyll-theme-cayman
 markdown: GFM
