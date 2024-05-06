@@ -13,6 +13,8 @@ from google.cloud import bigquery
 from nl2sql_query_embeddings import PgSqlEmb
 import os
 
+from google.cloud import aiplatform
+
 from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
 from json import loads, dumps
 from vertexai.language_models import TextGenerationModel
@@ -29,12 +31,24 @@ client = bigquery.Client()
 class Nl2sqlBq:
     "Bigquery nl2sql class"
 
-    def __init__(self, project_id, dataset_id, metadata_json_path=None, model_name="gemini-pro"):
+    def __init__(self, project_id, dataset_id, metadata_json_path=None, model_name="gemini-pro", tuned_model=True):
         "Init function"
         self.dataset_id = f"{project_id}.{dataset_id}"
         self.metadata_json = None
         self.model_name = model_name
+        print(self.model_name)
+        if model_name == 'text-bison@002' and tuned_model:
+            # self.model_name = model_name.fine_tuned('tune-large-model-20240503020104')
+            # model = aiplatform.Model('/projects/862253555914/locations/us-central1/models/7566417909400993792')
+            model = TextGenerationModel.from_pretrained("text-bison@002")
+            self.model_name = model.get_tuned_model("projects/862253555914/locations/us-central1/models/7566417909400993792")._endpoint_name
+            
+        else:
+            self.model_name = model_name
+        print(self.model_name)
+
         self.llm = VertexAI(temperature=0, model_name=self.model_name, max_output_tokens=1024)
+        
         self.engine = sqlalchemy.engine.create_engine(
             f"bigquery://{self.dataset_id.replace('.','/')}")
         if metadata_json_path:
@@ -449,16 +463,16 @@ class Nl2sqlBq:
 
     def self_reflection(self, question, query, max_tries=5):
         status, msg = self.execute_query(query, dry_run=True)
-        isgood_sql = False
+        good_sql = False
         if not status:
             # Repeat generation of the sql
             iter = 0;
-            while iter < max_tries or isgood_sql:
+            while iter < max_tries or good_sql:
                 prompt = self.generate_sql_few_shot_promptonly(question, table_name="", prev_sql=query)
                 query = self.invoke_llm(prompt)
-                isgood_sql, msg = self.execute_query(query, dry_run=True)
+                good_sql, msg = self.execute_query(query, dry_run=True)
                 iter+=1
-        return isgood_sql, query
+        return good_sql, query
 
     def text_to_sql_execute(self,question, table_name = None, logger_file = "log.txt"):
         "Converts text to sql and also executes sql query"
