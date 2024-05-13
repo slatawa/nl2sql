@@ -13,6 +13,8 @@ from google.cloud import bigquery
 from nl2sql_query_embeddings import PgSqlEmb
 import os
 
+from google.cloud import aiplatform
+
 from vertexai.preview.generative_models import GenerativeModel, GenerationConfig
 from json import loads, dumps
 from vertexai.language_models import TextGenerationModel
@@ -29,12 +31,24 @@ client = bigquery.Client()
 class Nl2sqlBq:
     "Bigquery nl2sql class"
 
-    def __init__(self, project_id, dataset_id, metadata_json_path=None, model_name="gemini-pro"):
+    def __init__(self, project_id, dataset_id, metadata_json_path=None, model_name="gemini-pro", tuned_model=True):
         "Init function"
         self.dataset_id = f"{project_id}.{dataset_id}"
         self.metadata_json = None
         self.model_name = model_name
-        self.llm = VertexAI(temperature=0, model_name=self.model_name, max_output_tokens=1024)
+        print(self.model_name)
+
+        if model_name == 'text-bison@002' and tuned_model:
+            # self.llm = VertexAI(temperature=0, model_name=self.model_name, tuned_model_name='projects/862253555914/locations/us-central1/models/7566417909400993792', max_output_tokens=1024)
+            self.llm = VertexAI(temperature=0, model_name=self.model_name, tuned_model_name='projects/174482663155/locations/us-central1/models/6975883408262037504', max_output_tokens=1024)
+ 
+        else:
+            self.llm = VertexAI(temperature=0, model_name=self.model_name, max_output_tokens=1024)
+
+        print(self.model_name)
+
+        # self.llm = VertexAI(temperature=0, model_name=self.model_name, tuned_model_name='projects/862253555914/locations/us-central1/models/7566417909400993792', max_output_tokens=1024)
+        
         self.engine = sqlalchemy.engine.create_engine(
             f"bigquery://{self.dataset_id.replace('.','/')}")
         if metadata_json_path:
@@ -223,7 +237,7 @@ class Nl2sqlBq:
         str: Modified SQL query with the specified dataset prefix 
         added to the tables in the FROM clause.
         """
-
+        print("Originall query = ", sql_query)
         dataset = self.dataset_id
         if sql_query:
             sql_query = sql_query.replace('`', '')
@@ -294,6 +308,8 @@ class Nl2sqlBq:
             with open(logger_file, 'a',encoding="utf-8") as f:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
                          \n\nPrompt:{sql_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
+            if sql_query.strip().startswith("Response:"):
+                sql_query = sql_query.split(":")[1].strip()
             return sql_query
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
@@ -339,6 +355,8 @@ class Nl2sqlBq:
             with open(logger_file, 'a',encoding="utf-8") as f:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
                          \n\nPrompt:{sql_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
+            if sql_query.strip().startswith("Response:"):
+                sql_query = sql_query.split(":")[1].strip()            
             return sql_query
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
@@ -449,16 +467,16 @@ class Nl2sqlBq:
 
     def self_reflection(self, question, query, max_tries=5):
         status, msg = self.execute_query(query, dry_run=True)
-        isgood_sql = False
+        good_sql = False
         if not status:
             # Repeat generation of the sql
             iter = 0;
-            while iter < max_tries or isgood_sql:
+            while iter < max_tries or good_sql:
                 prompt = self.generate_sql_few_shot_promptonly(question, table_name="", prev_sql=query)
                 query = self.invoke_llm(prompt)
-                isgood_sql, msg = self.execute_query(query, dry_run=True)
+                good_sql, msg = self.execute_query(query, dry_run=True)
                 iter+=1
-        return isgood_sql, query
+        return good_sql, query
 
     def text_to_sql_execute(self,question, table_name = None, logger_file = "log.txt"):
         "Converts text to sql and also executes sql query"
