@@ -37,17 +37,17 @@ class Nl2sqlBq:
         self.metadata_json = None
         self.model_name = model_name
         print(self.model_name)
+
         if model_name == 'text-bison@002' and tuned_model:
-            # self.model_name = model_name.fine_tuned('tune-large-model-20240503020104')
-            # model = aiplatform.Model('/projects/862253555914/locations/us-central1/models/7566417909400993792')
-            model = TextGenerationModel.from_pretrained("text-bison@002")
-            self.model_name = model.get_tuned_model("projects/862253555914/locations/us-central1/models/7566417909400993792")._endpoint_name
-            
+            # self.llm = VertexAI(temperature=0, model_name=self.model_name, tuned_model_name='projects/862253555914/locations/us-central1/models/7566417909400993792', max_output_tokens=1024)
+            self.llm = VertexAI(temperature=0, model_name=self.model_name, tuned_model_name='projects/174482663155/locations/us-central1/models/6975883408262037504', max_output_tokens=1024)
+ 
         else:
-            self.model_name = model_name
+            self.llm = VertexAI(temperature=0, model_name=self.model_name, max_output_tokens=1024)
+
         print(self.model_name)
 
-        self.llm = VertexAI(temperature=0, model_name=self.model_name, max_output_tokens=1024)
+        # self.llm = VertexAI(temperature=0, model_name=self.model_name, tuned_model_name='projects/862253555914/locations/us-central1/models/7566417909400993792', max_output_tokens=1024)
         
         self.engine = sqlalchemy.engine.create_engine(
             f"bigquery://{self.dataset_id.replace('.','/')}")
@@ -237,7 +237,7 @@ class Nl2sqlBq:
         str: Modified SQL query with the specified dataset prefix 
         added to the tables in the FROM clause.
         """
-
+        print("Originall query = ", sql_query)
         dataset = self.dataset_id
         if sql_query:
             sql_query = sql_query.replace('`', '')
@@ -308,6 +308,8 @@ class Nl2sqlBq:
             with open(logger_file, 'a',encoding="utf-8") as f:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
                          \n\nPrompt:{sql_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
+            if sql_query.strip().startswith("Response:"):
+                sql_query = sql_query.split(":")[1].strip()
             return sql_query
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
@@ -353,6 +355,8 @@ class Nl2sqlBq:
             with open(logger_file, 'a',encoding="utf-8") as f:
                 f.write(f">>>>\nModel:{self.model_name} \n\nQuestion: {question}\
                          \n\nPrompt:{sql_prompt} \n\nSql_query:{sql_query}<<<<\n\n\n")
+            if sql_query.strip().startswith("Response:"):
+                sql_query = sql_query.split(":")[1].strip()            
             return sql_query
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
