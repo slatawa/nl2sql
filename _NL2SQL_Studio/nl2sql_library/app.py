@@ -68,7 +68,7 @@ def linear_executor():
     question = request.json['question']
     execute_sql = request.json['execute_sql']
 
-    logger.info(f"Linear Executio engine for question : [{question}]")
+    logger.info(f"Linear Execution engine for question : [{question}]")
     from nl2sql_lib_executors import NL2SQL_Executors
     try:
         nle = NL2SQL_Executors()

@@ -75,9 +75,8 @@ class NL2SQL_Executors():
         """
             SQL Generation using Chain of Thought Executor
         """
-        # logger.info(f"Chain of Thought executor initialised")
-        llm = text_bison_32k()
         logger.info("Chain of Thought executor LLM initialised")
+        llm = text_bison_32k()
         # Disabling logs because these steps generate a LOT of logs.
         logger.disable("nl2sql.datasets.base")
         core_table_selector = CoreTableSelector(llm=llm,
@@ -114,16 +113,16 @@ class NL2SQL_Executors():
         sql = ""
         return res_id, sql
 
-    def generate_query(self, question, ds_name='zoominfo' ):
-        """
-            Generate query Function based on Executor
-        """
-        logger.info("Executing")
-        result = self.executor(
-               db_name= ds_name,
-               question = question
-            )
-        return result.result_id, result.generated_query
+    # def generate_query(self, question, ds_name='zoominfo' ):
+    #     """
+    #         Generate query Function based on Executor
+    #     """
+    #     logger.info("Executing")
+    #     result = self.executor(
+    #            db_name= ds_name,
+    #            question = question
+    #         )
+    #     return result.result_id, result.generated_query
 
 if __name__ == "__main__":
     

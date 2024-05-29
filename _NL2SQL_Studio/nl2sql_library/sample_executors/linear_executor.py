@@ -2,9 +2,16 @@
     SQL Generation using Linear Executor
 """
 import json
+import os
+import sys
+from os.path import dirname, abspath
+
+sys.path.insert(1, dirname(dirname(abspath(__file__))))
+
 # from nl2sql.datasets.base import Dataset
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
 
+dataset_name ="zoominfo" # @param {type:"string"}
 f = open('../utils/zoominfo_tables.json')
 zi = json.load(f)
 
@@ -18,13 +25,11 @@ data_dictionary_read = {
             },
     }
 
-with open('../datadictionary.json', 'w') as f:
-    json.dump(data_dictionary_read, f, indent=4)
 
 ## Executor Setup Code
 
-dataset_name = "zoominfo" # @param {type:"string"}
 bigquery_connection_string = "bigquery://sl-test-project-363109/zoominfo" # @param {type:"string"}
+
 executor = CoreLinearExecutor.from_connection_string_map(
    {
        dataset_name: bigquery_connection_string,
