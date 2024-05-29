@@ -16,8 +16,8 @@ import vertexai
 
 load_dotenv()
 #bigquery_connection_string = "bigquery://sl-test-project-363109/zoominfo"
-PROJ_CONFIG_FILE = "proj_config.json"
-SQL_LOG_FILE = "sqlgen_log.json"
+PROJ_CONFIG_FILE = "utils/proj_config.json"
+SQL_LOG_FILE = "utils/sqlgen_log.json"
 
 proj_config_dict = {"default": {"proj_name":"sl-test-project-363109",
                                 "dataset":"zoominfo", 
@@ -145,7 +145,7 @@ def log_update_feedback(result_id, user_feedback):
     except RuntimeError:
         logdata = {}
     logdata[result_id]['feedback'] = user_feedback
-    with open('sqlgen_log.json', 'w') as outFile:
+    with open(SQL_LOG_FILE, 'w') as outFile:
         json.dump(logdata, outFile)
 
 def bq_update_userfeedback(result_id, user_feedback):
@@ -188,6 +188,7 @@ result: {result}
 
 if __name__ == "__main__":
     # print(get_project_config())
+    print(os.getcwd())
     log_sql('dummy2',
             "what is revenue for construction industry", 
             "select revenue from table1 where indusry='consttruction'", "COT", "False")

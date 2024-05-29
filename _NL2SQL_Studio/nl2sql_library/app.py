@@ -10,7 +10,7 @@ import inspect
 import json
 import os
 
-from utils import *
+from utils.utility_functions import *
 
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS, cross_origin
@@ -39,7 +39,7 @@ bigquery_connection_string = initialize_db(get_project_config()['config']['proj_
 
 data_file_name = get_project_config()['config']['metadata_file']
 
-f = open(data_file_name)
+f = open(f"utils/{data_file_name}")
 zi = json.load(f)
 data_dictionary_read = {
             "zoominfo": {
@@ -51,6 +51,7 @@ data_dictionary_read = {
             },
     }
 
+print("curr path = ", os.getcwd())
 
 @app.route("/")
 def spec():
@@ -216,7 +217,7 @@ def upload_file():
         data2 = json.loads(my_json)
         data_to_save = json.dumps(data2, indent=4)
         target_file = get_project_config()['config']['metadata_file']
-        with open(target_file, 'w') as outFile:
+        with open(f"utils/{target_file}", 'w') as outFile:
             outFile.write(data_to_save)
         return "successs"
     except RuntimeError:
@@ -231,9 +232,9 @@ def user_feedback():
     feedback = request.json['user_feedback']
     try:
         log_update_feedback(result_id, feedback)
-        return "successfully updated user feedback"
+        return json.dumps({"response":"successfully updated user feedback"})
     except RuntimeError:
-        return "failed to update user feedback"
+        return json.dumps({"response":"failed to update user feedback"})
 
 @app.route('/execsql', methods=['POST'])
 def execute_sql_query():

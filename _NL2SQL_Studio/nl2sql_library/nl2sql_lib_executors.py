@@ -1,15 +1,16 @@
 """
     Wrapper file for invoking the Executors from the app.py file
 """
+import os
 import json
 import vertexai
 from loguru import logger
 
 
 
-from ragexecutor_pydantic_class import RAG_Executor
+# from ragexecutor_pydantic_class import RAG_Executor
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
-from utils import get_project_config, initialize_db
+from utils.utility_functions import get_project_config, initialize_db
 
 from nl2sql.llms.vertexai import text_bison_32k
 from nl2sql.tasks.table_selection.core import CoreTableSelector, prompts as cts_prompts
@@ -34,19 +35,10 @@ data_file_name = get_project_config()['config']['metadata_file']
 
 logger.info(f"Data = {bigquery_connection_string}, {dataset_name}, {data_file_name}" )
 
-f = open(data_file_name)
 
-zi = json.load(f)
-data_dictionary_read = {
-            "zoominfo": {
-                "description" : "This dataset contains information of Zoominfo Data\
-                      with details on headquarters, marketing professionaals\
-                          and providng tuition services.",
-                "tables": 
-                   zi
-            },
-    }
 question_to_gen = "What is the revenue for construction industry?"
+
+print("Executors path = ", os.getcwd())
 
 class NL2SQL_Executors():
     """
@@ -116,8 +108,10 @@ class NL2SQL_Executors():
         """
             SQL Generation using RAG Executor
         """
-        ragexec = RAG_Executor()
-        res_id, sql = ragexec.generate_sql(question)
+        # ragexec = RAG_Executor()
+        # res_id, sql = ragexec.generate_sql(question)
+        res_id = ""
+        sql = ""
         return res_id, sql
 
     def generate_query(self, question, ds_name='zoominfo' ):
@@ -132,10 +126,23 @@ class NL2SQL_Executors():
         return result.result_id, result.generated_query
 
 if __name__ == "__main__":
+    
+    f = open(f"utils/{data_file_name}")
+
+    zi = json.load(f)
+    data_dictionary_read = {
+                "zoominfo": {
+                    "description" : "This dataset contains information of Zoominfo Data\
+                        with details on headquarters, marketing professionaals\
+                            and providng tuition services.",
+                    "tables": 
+                    zi
+                },
+        }
     nle = NL2SQL_Executors()
     res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
     print("Generated SQL = ", gen_sql)
-    result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
+    # result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
     # print("Generated SQL = ", gen_sql)
-    res_id, gen_sql = nle.rag_executor()
-    print("Generated SQL = ", gen_sql)
+    # res_id, gen_sql = nle.rag_executor()
+    # print("Generated SQL = ", gen_sql)
