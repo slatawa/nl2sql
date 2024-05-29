@@ -39,3 +39,18 @@ order by 2 limit 5"
 How many unique products are in service?,select count(distinct PRODUCT) from `sl-test-project-353312.EY.invoice_specific` 
 How many unique products are in service?,select count(distinct PRODUCT) from `sl-test-project-353312.EY.invoice_specific` 
 How many unique products are in service at the organisation?,select count(distinct PRODUCT) from `sl-test-project-353312.EY.invoice_specific` 
+How many employees in California are from Livingston County?,select count(*) from `sl-test-project-363109.zoominfo.zi-retail-companies-headquartered-california` where ZI_C_COMPANY_COUNTY = <sq>Livingston County<sq>
+What is the revenue for pharma industry?,select * from table1 where industry=<dq>pharma<dq>
+What is the revenue for pharma industry?,select * from table1 where industry=<dq>pharma<dq>
+What is the revenue for manufacturing industry?,select * from table1 where industry=<dq>pharma<dq>
+What is the revenue for manufacturing industry?,select * from table1 where industry=<dq>pharma<dq>
+What are the top 10 industries having revenue greater than 1 million?,select * from table1 where industry=<dq>pharma<dq>
+Which industry has highest revenue in Dallas county?,select revenue from table1 where county=<sq><sq>Dallas<dq> order by revenue DESC;
+Testing questionn add,Select * from tab;
+Testing questionn add,Select * from tab;
+Testing,Testing
+New question,updated sql
+Testing,Testing
+test,
+Last question to test,Select last question
+Deployed version of the  code,Select all deployed
