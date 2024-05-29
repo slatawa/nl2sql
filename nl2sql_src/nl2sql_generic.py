@@ -24,7 +24,7 @@ from vertexai.language_models import CodeChatModel
 from vertexai.language_models import CodeGenerationModel
 
 
-client = bigquery.Client()
+client = bigquery.Client()  
 
 # Main folder implementation
 
