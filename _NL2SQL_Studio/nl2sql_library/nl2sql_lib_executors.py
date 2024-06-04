@@ -3,12 +3,10 @@
 """
 import os
 import json
+import sys
 import vertexai
 from loguru import logger
 
-
-
-# from ragexecutor_pydantic_class import RAG_Executor
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
 from utils.utility_functions import get_project_config, initialize_db
 
@@ -16,29 +14,19 @@ from nl2sql.llms.vertexai import text_bison_32k
 from nl2sql.tasks.table_selection.core import CoreTableSelector, prompts as cts_prompts
 from nl2sql.tasks.column_selection.core import CoreColumnSelector, prompts as ccs_prompts
 from nl2sql.tasks.sql_generation.core import CoreSqlGenerator, prompts as csg_prompts
-
-# dataset_name = "zoominfo"
-# bigquery_connection_string = "bigquery://sl-test-project-363109/zoominfo"
+from sample_executors.rag_executor import RAG_Executor
 
 vertexai.init(project=get_project_config()['config']['proj_name'],
                location="us-central1")
 
-
-# f = open('zoominfo_tables.json')
-
 dataset_name = get_project_config()['config']['dataset'] #"zoominfo"
-
 bigquery_connection_string = initialize_db(get_project_config()['config']['proj_name'],
                                             get_project_config()['config']['dataset'])
-
 data_file_name = get_project_config()['config']['metadata_file']
-
 logger.info(f"Data = {bigquery_connection_string}, {dataset_name}, {data_file_name}" )
-
 
 question_to_gen = "What is the revenue for construction industry?"
 
-print("Executors path = ", os.getcwd())
 
 class NL2SQL_Executors():
     """
@@ -107,27 +95,32 @@ class NL2SQL_Executors():
         """
             SQL Generation using RAG Executor
         """
-        # ragexec = RAG_Executor()
-        # res_id, sql = ragexec.generate_sql(question)
-        res_id = ""
-        sql = ""
+        ragexec = RAG_Executor()
+        res_id, sql = ragexec.generate_sql(question)
+
         return res_id, sql
 
-    # def generate_query(self, question, ds_name='zoominfo' ):
-    #     """
-    #         Generate query Function based on Executor
-    #     """
-    #     logger.info("Executing")
-    #     result = self.executor(
-    #            db_name= ds_name,
-    #            question = question
-    #         )
-    #     return result.result_id, result.generated_query
 
 if __name__ == "__main__":
-    
-    f = open(f"utils/{data_file_name}")
 
+    if len(sys.argv) < 2:
+        print("Usage : python nl2sql_lib_executors.py <executor name>")
+        print("For ex: python nl2sql_lib_executors.py rag ")
+        print("Types of Executors : linear, cot, rag")
+        print("Default is Linear executor")
+        executor = "linear"
+    elif sys.argv[1] == 'linear':
+        executor = 'linear'
+    elif sys.argv[1] == 'cot':
+        executor = 'cot'
+    elif sys.argv[1] == 'rag':
+        executor = 'rag'
+    else:
+        print("Invalid executor type")
+        print("Defaulting to Linear exeutor")
+        executor = 'linear'
+
+    f = open(f"utils/{data_file_name}")
     zi = json.load(f)
     data_dictionary_read = {
                 "zoominfo": {
@@ -138,10 +131,16 @@ if __name__ == "__main__":
                     zi
                 },
         }
+    
     nle = NL2SQL_Executors()
-    # res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
-    # print("Generated SQL = ", gen_sql)
-    result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
+    if executor == 'linear':
+        res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
+        print('linear')
+    elif executor == 'cot':
+        result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
+        print('cot')
+    elif executor == 'rag':
+        res_id, gen_sql = nle.rag_executor(question=question_to_gen)
+        print('rag')
+    
     print("Generated SQL = ", gen_sql)
-    # res_id, gen_sql = nle.rag_executor()
-    # print("Generated SQL = ", gen_sql)
