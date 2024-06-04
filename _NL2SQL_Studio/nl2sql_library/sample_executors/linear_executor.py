@@ -2,7 +2,7 @@
     SQL Generation using Linear Executor
 """
 import json
-import os
+# import os
 import sys
 from os.path import dirname, abspath
 
@@ -12,7 +12,7 @@ sys.path.insert(1, dirname(dirname(abspath(__file__))))
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
 
 dataset_name ="zoominfo" # @param {type:"string"}
-f = open('../utils/zoominfo_tables.json')
+f = open('../utils/zoominfo_tables.json', encoding="utf-8")
 zi = json.load(f)
 
 data_dictionary_read = {

@@ -1,11 +1,11 @@
 """
   Chain of Thought Executor Sample
 """
-from loguru import logger
 import json
-import os
+# import os
 import sys
 from os.path import dirname, abspath
+from loguru import logger
 
 sys.path.insert(1, dirname(dirname(abspath(__file__))))
 
@@ -15,7 +15,7 @@ from nl2sql.tasks.table_selection.core import CoreTableSelector, prompts as cts_
 from nl2sql.tasks.column_selection.core import CoreColumnSelector, prompts as ccs_prompts
 from nl2sql.tasks.sql_generation.core import CoreSqlGenerator, prompts as csg_prompts
 
-f = open('../utils/zoominfo_tables.json')
+f = open('../utils/zoominfo_tables.json', encoding="utf-8")
 zi = json.load(f)
 data_dictionary_read = {
             "zoominfo": {

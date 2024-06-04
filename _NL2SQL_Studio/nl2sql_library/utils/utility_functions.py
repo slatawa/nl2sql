@@ -4,13 +4,13 @@
 """
 import os
 import json
-import pandas as pd
+# import pandas as pd
 
 from google.cloud import bigquery
 from dotenv import load_dotenv
 from loguru import logger
 
-from google.cloud import aiplatform
+# from google.cloud import aiplatform
 from vertexai.language_models import TextGenerationModel
 import vertexai
 
@@ -42,7 +42,7 @@ def config_project(proj_name="sl-test-project-363109",
         Save the project configuration details
     """
     try:
-        with open(PROJ_CONFIG_FILE, 'r') as infile:
+        with open(PROJ_CONFIG_FILE, 'r', encoding="utf-8") as infile:
             proj_config = json.load(infile)
     # except:
     except FileNotFoundError:
@@ -54,7 +54,7 @@ def config_project(proj_name="sl-test-project-363109",
     proj_config['config']['dataset']=dataset
     proj_config['config']['metadata_file']=metadata_file
     json_obj = json.dumps(proj_config, indent=4)
-    with open(PROJ_CONFIG_FILE, 'w') as outfile:
+    with open(PROJ_CONFIG_FILE, 'w', encoding="utf-8") as outfile:
         outfile.write(json_obj)
         # json.dump(proj_config, outfile)
 
@@ -65,7 +65,7 @@ def get_project_config():
         Return the Project configuration details
     """
     try:
-        with open(PROJ_CONFIG_FILE, 'r') as infile:
+        with open(PROJ_CONFIG_FILE, 'r', encoding="utf-8") as infile:
             proj_config = json.load(infile)
     # except:
     except FileNotFoundError:
@@ -74,7 +74,7 @@ def get_project_config():
         proj_config['config'] = proj_config['default']
 
     json_obj = json.dumps(proj_config, indent=4)
-    with open(PROJ_CONFIG_FILE, 'w') as outfile:
+    with open(PROJ_CONFIG_FILE, 'w', encoding="utf-8") as outfile:
         outfile.write(json_obj)
         # json.dump(proj_config, outfile)
 
@@ -119,8 +119,8 @@ def log_sql(result_id="dummy", question="dummy", sql="dummy", executor="dummy", 
     """
     # project = get_project_config()['config']['proj_name']
     try:
-        with open(SQL_LOG_FILE, 'r') as inpFile:
-            logdata = json.load(inpFile)
+        with open(SQL_LOG_FILE, 'r', encoding="utf-8") as inpfile:
+            logdata = json.load(inpfile)
     # except:
     except RuntimeError:
         logdata = {}
@@ -130,23 +130,23 @@ def log_sql(result_id="dummy", question="dummy", sql="dummy", executor="dummy", 
     logdata[result_id]['sql'] = sql
     logdata[result_id]['executor'] = executor
     logdata[result_id]['feedback'] = feedback
-    with open(SQL_LOG_FILE, 'w') as outFile:
-        json.dump(logdata, outFile)
+    with open(SQL_LOG_FILE, 'w', encoding="utf-8") as outfile:
+        json.dump(logdata, outfile)
 
 def log_update_feedback(result_id, user_feedback):
     """
         Updates the saved log with user feedback
     """
-    project = get_project_config()['config']['proj_name']
+    # project = get_project_config()['config']['proj_name']
     try:
-        with open(SQL_LOG_FILE, 'r') as inpFile:
-            logdata = json.load(inpFile)
+        with open(SQL_LOG_FILE, 'r', encoding="utf-8") as inpfile:
+            logdata = json.load(inpfile)
     # except:
     except RuntimeError:
         logdata = {}
     logdata[result_id]['feedback'] = user_feedback
-    with open(SQL_LOG_FILE, 'w') as outFile:
-        json.dump(logdata, outFile)
+    with open(SQL_LOG_FILE, 'w', encoding="utf-8") as outfile:
+        json.dump(logdata, outfile)
 
 def bq_update_userfeedback(result_id, user_feedback):
     """
