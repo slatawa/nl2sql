@@ -1,4 +1,7 @@
-import json
+"""
+    RAG baased executor sample file
+"""
+# import json
 from nl2sql.llms.vertexai import text_bison_32k
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
 #from nl2sql.tasks.sql_generation.rag_pydantic import RagSqlGenerator
@@ -9,6 +12,9 @@ dataset_name = "sl-test-project-363109.zoominfo"
 bigquery_connection_string = "bigquery://sl-test-project-363109/zoominfo"
 
 class RAG_Executor():
+    """
+        Class to initialise and execute the RAG executor
+    """
 
     def __init__(self):
 
@@ -21,9 +27,15 @@ class RAG_Executor():
         self.project_id = "sl-test-project-363109"
         self.dataset_id = "sl-test-project-363109.zoominfo"
 
-        self.rag_sql_generator = RagSqlGenerator(llm=llm, PGPROJ=self.PGPROJ, PGLOCATION=self.PGLOCATION,
-                                        PGINSTANCE=self.PGINSTANCE, PGDB=self.PGDB, PGUSER=self.PGUSER,
-                                        PGPWD=self.PGPWD, project_id=self.project_id, dataset_id=self.dataset_id)
+        self.rag_sql_generator = RagSqlGenerator(llm=llm,
+                                                 PGPROJ=self.PGPROJ,
+                                                 PGLOCATION=self.PGLOCATION,
+                                                 PGINSTANCE=self.PGINSTANCE,
+                                                 PGDB=self.PGDB,
+                                                 PGUSER=self.PGUSER,
+                                                 PGPWD=self.PGPWD,
+                                                 project_id=self.project_id,
+                                                 dataset_id=self.dataset_id)
 
 
         self.executor = CoreLinearExecutor.from_connection_string_map(
@@ -34,13 +46,16 @@ class RAG_Executor():
         )
 
     def generate_sql(self, question=""):
+        """
+            Function to generate the SQL
+        """
         print("\n\n", "=" * 25, "Executor Created", "=" * 25, "\n\n")
         print("Executor ID :", self.executor.executor_id)
 
 
         result2 = self.executor(
             db_name= dataset_name,
-            question = question 
+            question = question
         )
         print("\n\n", "="*50, "Generated SQL", "="*50, "\n\n")
         print("Result ID:", result2.result_id, "\n\n")
@@ -52,6 +67,6 @@ if __name__ == "__main__":
 
     print("Inside the main body")
     ragexec = RAG_Executor()
-    id, sql = ragexec.generate_sql("What is the total revenue for constuction industry? ")
-    print("Exeuctor Id = ", id)
+    res_id, sql = ragexec.generate_sql("What is the total revenue for constuction industry? ")
+    print("Exeuctor Id = ", res_id)
     print("Gen SQLL = ", sql)
