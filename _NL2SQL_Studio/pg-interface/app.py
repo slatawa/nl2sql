@@ -11,30 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import datetime
-import os
-
-import pandas
-from flask import Flask, jsonify, request, session
-from flask_cors import CORS, cross_origin
-from google.cloud import bigquery
-from dotenv import load_dotenv
-from loguru import logger
-
-load_dotenv()
-
-import re
-
+"""
+    Main file to serve the APIs
+"""
 import sys
 import inspect
 import json
 
+import os
+
+from flask import Flask, request
+from flask_cors import CORS
+from google.cloud import bigquery
+from dotenv import load_dotenv
+from loguru import logger
+from nl2sql_query_embeddings import PgSqlEmb
+
+load_dotenv()
+
+
+
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
+sys.path.insert(0, parentdir)
 
-from nl2sql_query_embeddings import PgSqlEmb
 
 app = Flask(__name__)
 
