@@ -1,8 +1,13 @@
 """
   Chain of Thought Executor Sample
 """
-import json
 from loguru import logger
+import json
+import os
+import sys
+from os.path import dirname, abspath
+
+sys.path.insert(1, dirname(dirname(abspath(__file__))))
 
 from nl2sql.llms.vertexai import text_bison_32k
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
