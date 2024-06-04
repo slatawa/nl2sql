@@ -139,9 +139,9 @@ if __name__ == "__main__":
                 },
         }
     nle = NL2SQL_Executors()
-    res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
-    print("Generated SQL = ", gen_sql)
-    # result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
+    # res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
     # print("Generated SQL = ", gen_sql)
+    result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
+    print("Generated SQL = ", gen_sql)
     # res_id, gen_sql = nle.rag_executor()
     # print("Generated SQL = ", gen_sql)
