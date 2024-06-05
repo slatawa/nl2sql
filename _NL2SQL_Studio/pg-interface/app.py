@@ -68,9 +68,12 @@ def create_pgtable():
     """
     table_name = request.json['table_name']
 
-    pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD, pg_table=table_name)
-    pge.create_table(table_name)
-    return {"success"}
+    try:
+        pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD, pg_table=table_name)
+        pge.create_table(table_name)
+        return {"success"}
+    except:
+        return {"failed"}
 
 @app.route('/api/record/create', methods=['POST'])
 def create_pgtable_record():
@@ -79,11 +82,13 @@ def create_pgtable_record():
     """
     question = request.json['question']
     mappedsql = request.json['sql']
-
     logger.info(f"Input data : {question} and {mappedsql}")
-    pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
-    pge.insert_row(question, mappedsql)
-    return "Successfully inserted record"
+    try:
+        pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
+        pge.insert_row(question, mappedsql)
+        return "Successfully inserted record"
+    except:
+        return "Unable to insert record"
 
 @app.route('/api/similar_questions', methods=['POST'])
 def similar_questions():
@@ -91,11 +96,13 @@ def similar_questions():
         Returns 3 most similar questions to the given question
     """
     question = request.json['question']
-    pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
-    results = pge.search_matching_queries(question)
-    return_val = json.dumps(results)
-    return return_val
-
+    try:
+        pge = PgSqlEmb(PGPROJ, PGLOCATION, PGINSTANCE, PGDB, PGUSER, PGPWD)
+        results = pge.search_matching_queries(question)
+        return_val = json.dumps(results)
+        return return_val
+    except:
+        return "Similar questions not found"
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
