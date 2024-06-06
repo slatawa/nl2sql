@@ -5,6 +5,7 @@ import json
 # import os
 import sys
 from os.path import dirname, abspath
+from loguru import logger
 
 sys.path.insert(1, dirname(dirname(abspath(__file__))))
 
@@ -12,8 +13,8 @@ sys.path.insert(1, dirname(dirname(abspath(__file__))))
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
 
 dataset_name ="zoominfo" # @param {type:"string"}
-f = open('../utils/zoominfo_tables.json', encoding="utf-8")
-zi = json.load(f)
+metadata_cache_file = open('../utils/zoominfo_tables.json', encoding="utf-8")
+zoominfo_data = json.load(metadata_cache_file)
 
 data_dictionary_read = {
             "zoominfo": {
@@ -21,7 +22,7 @@ data_dictionary_read = {
                   with details on headquarters, marketing professionaals and\
                     providng tuition services.",
                 "tables": 
-                   zi
+                   zoominfo_data
             },
     }
 
@@ -37,14 +38,12 @@ executor = CoreLinearExecutor.from_connection_string_map(
    data_dictionary = data_dictionary_read
 )
 
-print("\n\n", "="*25, "Executor Created", "="*25, "\n\n")
-print("Executor ID :", executor.executor_id)
+logger.info(f"Executor ID : {executor.executor_id}")
 
 ## Now run the executor with a sample question
 result = executor(
    db_name= dataset_name,
    question = "What is the revenue of construction industry?" # @param {type:"string"}
 )
-print("\n\n", "="*50, "Generated SQL", "="*50, "\n\n")
-print("Result ID:", result.result_id, "\n\n")
-print(result.generated_query)
+logger.info(f"Result ID : {result.result_id}")
+logger.info(f"Generated SQL : \n {result.generated_query}")

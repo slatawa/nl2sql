@@ -29,8 +29,6 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-
-
 dataset_name = get_project_config()['config']['dataset'] #"zoominfo"
 
 # bigquery_connection_string = "bigquery://sl-test-project-363109/zoominfo"
@@ -39,19 +37,17 @@ bigquery_connection_string = initialize_db(get_project_config()['config']['proj_
 
 data_file_name = get_project_config()['config']['metadata_file']
 
-f = open(f"utils/{data_file_name}")
-zi = json.load(f)
+metadata_cache_file = open(f"utils/{data_file_name}")
+zoominfo_data = json.load(metadata_cache_file)
 data_dictionary_read = {
             "zoominfo": {
                 "description" : "This dataset contains information of Zoominfo Data\
                       with details on headquarters, marketing professionaals and\
                           providng tuition services.",
                 "tables": 
-                   zi
+                   zoominfo_data
             },
     }
-
-print("curr path = ", os.getcwd())
 
 @app.route("/")
 def spec():
@@ -88,11 +84,11 @@ def linear_executor():
                                     "sql_result": sql_result,
                                     "error_msg": "", }
             except RuntimeError:
-                print("internal try catch")
+                logger.error('Runtime error while executing the Generated Query')
                 response_string = {"result_id": res_id,
                                     "generated_query": sql,
-                                     "sql_result": sql_result,
-                                     "error_msg": "", }
+                                     "sql_result": "",
+                                     "error_msg": "Runtime error while executing the Generated Query", }
     except RuntimeError:
         logger.debug(f"Linear SQL Generation uncussessful : [{question}]")
         response_string = {"result_id": 0,
@@ -132,11 +128,11 @@ def cot_executor():
                                     "sql_result": sql_result,
                                     "error_msg": "", }
             except RuntimeError:
-                print("internal try catch")
+                logger.error('Runtime error while executing the Generated Query')
                 response_string = {"result_id": res_id,
                                     "generated_query": sql,
-                                    "sql_result": sql_result,
-                                    "error_msg": "", }
+                                    "sql_result": "",
+                                    "error_msg": "Runtime error while executing the Generated Query", }
     except RuntimeError:
         logger.debug(f"CoT SQL generation unsuccessful : [{question}]")
         response_string = {"result_id": 0,
@@ -176,11 +172,11 @@ def rag_executor():
                                     "sql_result": sql_result,
                                     "error_msg": "", }
             except RuntimeError:
-                print("internal try catch")
+                logger.error('Runtime error while executing the Generated Query')
                 response_string = {"result_id": res_id,
                                     "generated_query": sql,
-                                    "sql_result": sql_result,
-                                    "error_msg": "", }
+                                    "sql_result": "",
+                                    "error_msg": "Runtime error while executing the Generated Query", }
     except RuntimeError:
         logger.debug(f"RAG SQL generation unsuccessful : [{question}]")
         response_string = {"result_id": 0,
@@ -201,7 +197,7 @@ def project_config():
     metadata_file = request.json['metadata_file']
     config_project(project, dataset, metadata_file)
 
-    return "successs"
+    return json.dumps({"response":"Project configuration successful"})
 
 @app.route('/uploadfile', methods=['POST'])
 def upload_file():
@@ -221,7 +217,7 @@ def upload_file():
             outFile.write(data_to_save)
         return "successs"
     except RuntimeError:
-        return "failed to upload file"
+        return json.dumps({"response":"Failed to upload file"})
 
 @app.route('/userfb', methods=['POST'])
 def user_feedback():
@@ -232,9 +228,9 @@ def user_feedback():
     feedback = request.json['user_feedback']
     try:
         log_update_feedback(result_id, feedback)
-        return json.dumps({"response":"successfully updated user feedback"})
+        return json.dumps({"response":"Successfully updated user feedback"})
     except RuntimeError:
-        return json.dumps({"response":"failed to update user feedback"})
+        return json.dumps({"response":"Failed to update user feedback"})
 
 @app.route('/execsql', methods=['POST'])
 def execute_sql_query():

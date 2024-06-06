@@ -52,6 +52,7 @@ import pg8000
 import sqlalchemy
 from pydantic import constr
 #from nl2sql.tasks.sql_generation.core import CoreSqlGenerator, prompts as csg_prompts
+from loguru import logger
 from utils import *
 
 
@@ -84,7 +85,6 @@ class RagSqlGenerator(BaseSqlGenerationTask):
         intermediate_steps: list[Any] = []
         # meta_data_json_path = "./nl2sql/datasets/zoominfo-metadata.json"
         try:
-            # print(os.path.abspath(os.path.join("./", os.pardir)))
             app_dir = os.path.abspath(os.path.join("./", os.curdir))
         except:
             print("Some issue in file paths")
@@ -93,8 +93,6 @@ class RagSqlGenerator(BaseSqlGenerationTask):
             app_dir = os.path.abspath(os.path.join("./", os.pardir))
 
         meta_data_json_path = app_dir + "/utils/zoominfo-metadata.json"
-        
-        # print("Metadata path new = ", meta_data_json_path)
         
         nl2sqlbq_client = Nl2sqlBq_rag( project_id=self.project_id,
                                         dataset_id=self.dataset_id,
@@ -246,9 +244,7 @@ Table name | description
 
 Question: {question}
 '''
-        # print(prompt)
         result = self.llm.invoke(prompt)
-        #print(result)
 
         segments = result.split(',')
         tables_list = []
@@ -260,7 +256,7 @@ Question: {question}
                 tables_list.append(value.strip())
             else:
                 tables_list.append(segment)
-        print("Table Filter - ", tables_list)
+        logger.info(f"Table Filter - {tables_list}")
         return tables_list
 
     def case_handler_transform(self,sql_query: str) -> str:
@@ -339,7 +335,8 @@ Question: {question}
 
     def text_to_sql(self,question, table_name = None, logger_file = "log.txt"):
         "Converts natural language question to sql query"
-        print(question)
+        # print(question)
+        logger.info(f"Input quesiton: {question}")
         try:
             if not table_name:
                 if len(self.metadata_json.keys())>1:
@@ -402,7 +399,8 @@ Question: {question}'''
     def text_to_sql_fewshot(self,question, table_name = None, logger_file = "log.txt"):
         "Converts natural language question to sql query"
         #print(prompt1.prompt_id)
-        print(question)
+        # print(question)
+        logger.info(f"Input question : {question}")
         # self.pge.recreate_vectordb_index()
         
         
@@ -414,7 +412,7 @@ Question: {question}'''
                 else:
                     table_name = list(self.metadata_json.keys())[0]
                     
-            print("Table name ", table_name)
+            logger.info(f"Table name selected : {table_name}")
             
             table_json = self.metadata_json[table_name]
             columns_json = table_json["Columns"]
@@ -641,15 +639,17 @@ students answer: {llm_amswer}
                 if row["table"].strip():
                     table_name = row["table"]
                 question = row["question"]
-                print(question)
+                
+                logger.info(f"Given question : {question}")
                 sql_gen  = self.text_to_sql(question, table_name = table_name,
                                             logger_file = logger_file)
-                print(sql_gen)
+                
                 rating = self.auto_verify(question, row["ground_truth_sql"], sql_gen)
                 row_result = [question, row["ground_truth_sql"], sql_gen, rating]
                 if execute_query:
                     result = self.execute_query(sql_gen)
-                    print(result)
+                    
+                    logger.info(f"Execution result : {result}")
                     row_result.append(result)
                 if execute_query and result2nl:
                     nl = self.result2nl(result, question, insight=insight)
@@ -691,7 +691,8 @@ class Nl2Sql_embed():
         return embeddings
     
     def insert_data(self, question, sql):
-        print(question, sql)
+        # print(question, sql)
+        logger.info(f"Saving Question = {question}, sql = {sql}")
         try:
             with open(self.EMBEDDING_FILE, "r") as f:
                 data = json.load(f)
@@ -733,7 +734,7 @@ class Nl2Sql_embed():
         embeddings_data = self.load_embeddings()
         
         query_embeddings = [ item['question_embedding'] for item in embeddings_data]
-        print(len(query_embeddings))
+        # print(len(query_embeddings))
 
         query_array_updated = [[item['question'], item['sql']] for item in embeddings_data]
         embeddings_data_array = np.asarray(query_embeddings, dtype=np.float32)

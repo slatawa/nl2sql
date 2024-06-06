@@ -29,9 +29,9 @@ def initialize_db(proj="sl-test-project-363109", dataset="zoominfo"):
     """
         Initialize the BQ connection string
     """
-    print("Init init DB ", proj, dataset)
+    logger.info(f"Initialising DB : Project =  {proj} and Dataset = {dataset}")
     bigquery_connection_string = f"bigquery://{proj}/{dataset}"
-    print(bigquery_connection_string)
+    logger.info(f"BigQuery Connection string = {bigquery_connection_string}")
     logger.info(f"BQ connection string: {bigquery_connection_string}" )
     return bigquery_connection_string
 
@@ -187,8 +187,7 @@ result: {result}
 
 
 if __name__ == "__main__":
-    # print(get_project_config())
-    print(os.getcwd())
+    print("Current working directory : ", os.getcwd())
     log_sql('dummy2',
             "what is revenue for construction industry", 
             "select revenue from table1 where indusry='consttruction'", "COT", "False")

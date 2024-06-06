@@ -15,15 +15,15 @@ from nl2sql.tasks.table_selection.core import CoreTableSelector, prompts as cts_
 from nl2sql.tasks.column_selection.core import CoreColumnSelector, prompts as ccs_prompts
 from nl2sql.tasks.sql_generation.core import CoreSqlGenerator, prompts as csg_prompts
 
-f = open('../utils/zoominfo_tables.json', encoding="utf-8")
-zi = json.load(f)
+metadata_cache_file = open('../utils/zoominfo_tables.json', encoding="utf-8")
+zoominfo_data = json.load(metadata_cache_file)
 data_dictionary_read = {
             "zoominfo": {
                   "description" : "This dataset contains information of Zoominfo Data\
                       with details on headquarters, marketing professionaals and \
                         providng tuition services.",
                   "tables": 
-                   zi
+                   zoominfo_data
             },
     }
 
@@ -49,7 +49,7 @@ dd_cot_executor = CoreLinearExecutor.from_connection_string_map(
 )
 
 print("\n\n", "="*25, "Executor Created", "="*25, "\n\n")
-print("Executor ID :", dd_cot_executor.executor_id)
+logger.info(f"Executor ID : {dd_cot_executor.executor_id}")
 
 ## Now run the executor with a sample question
 
@@ -57,6 +57,6 @@ dd_cot_result = dd_cot_executor(
     db_name= dataset_name,
     question = "What is the revenue of construction industry?" # @param {type:"string"}
 )
-print("\n\n", "="*50, "Generated SQL", "="*50, "\n\n")
-print("Result ID:", dd_cot_result.result_id, "\n\n")
-print(dd_cot_result.generated_query)
+
+logger.info(f"Result ID : {dd_cot_result.result_id} ")
+logger.info(f"Generated SQL : \n {dd_cot_result.generated_query}")

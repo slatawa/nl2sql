@@ -104,10 +104,13 @@ class NL2SQL_Executors():
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
-        print("Usage : python nl2sql_lib_executors.py <executor name>")
-        print("For ex: python nl2sql_lib_executors.py rag ")
-        print("Types of Executors : linear, cot, rag")
-        print("Default is Linear executor")
+        print('\t\t', "*"*55)
+        print("\t\t Usage : python nl2sql_lib_executors.py <executor name>")
+        print('\t\t', "*"*55)
+        print("\t\t For ex: python nl2sql_lib_executors.py rag ")
+        print("\t\t Types of Executors : linear, cot, rag")
+        print("\t\t Default executor: linear")
+        print('\t\t', "*"*55)
         executor = "linear"
     elif sys.argv[1] == 'linear':
         executor = 'linear'
@@ -116,31 +119,36 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'rag':
         executor = 'rag'
     else:
-        print("Invalid executor type")
-        print("Defaulting to Linear exeutor")
+        print('\t\t', "*"*55)
+        print("\t\t Invalid executor type")
+        print("\t\t Supported executors are : linear, cot, rag")
+        print("\t\t Defaulting to Linear exeutor")
+        print('\t\t', "*"*55)
+
         executor = 'linear'
 
-    f = open(f"utils/{data_file_name}")
-    zi = json.load(f)
+    metadata_cache_file = open(f"utils/{data_file_name}")
+    zoominfo_data = json.load(metadata_cache_file)
     data_dictionary_read = {
                 "zoominfo": {
                     "description" : "This dataset contains information of Zoominfo Data\
                         with details on headquarters, marketing professionaals\
                             and providng tuition services.",
                     "tables": 
-                    zi
+                    zoominfo_data
                 },
         }
     
     nle = NL2SQL_Executors()
     if executor == 'linear':
         res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
-        print('linear')
+        logger.info("Linear Executor ")
     elif executor == 'cot':
         result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
-        print('cot')
+        logger.info("Chain of Thought Executor")
     elif executor == 'rag':
         res_id, gen_sql = nle.rag_executor(question=question_to_gen)
-        print('rag')
+        logger.info("RAG Executor")
+
+    logger.info(f"Generated SQL : \n {gen_sql}")    
     
-    print("Generated SQL = ", gen_sql)
