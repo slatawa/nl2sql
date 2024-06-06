@@ -10,7 +10,7 @@ entrypoint: gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
 
 runtime_config:
     operating_system: "ubuntu22"
-    runtime_version: "3.11"
+    runtime_version: "3.10"
 
 #optional    
 #resources:

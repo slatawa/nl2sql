@@ -7,4 +7,4 @@ entrypoint: streamlit run nl2sqlstudio_ui.py --server.port=8080 --server.address
 
 runtime_config:
     operating_system: "ubuntu22"
-    runtime_version: "3.11.2"
+    runtime_version: "3.10"
