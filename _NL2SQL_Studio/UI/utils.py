@@ -20,8 +20,8 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from google.auth.transport import requests
-# import google.auth.transport.requests
-import requests
+# import google.auth.transport.requests as AUTH_REQUESTS
+import requests 
 
 # from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -187,16 +187,26 @@ def add_question_to_db(sample_question, sample_sql):
 # GOOGLE_REDIRECT_URI = ''
 
 
-def open_url(url):
+def back_to_login_page():
     """
         Open the given URL 
     """
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    url = config['DEFAULT']['GOOGLE_REDIRECT_URI']
     open_script= """
         <script type="text/javascript">
-            window.open('%s', '_blank').focus();
+            window.open('%s', '_self').focus();
         </script>
     """ % (url)
+
+    st.session_state.token = None
+    st.session_state.login_status = False
+    st.query_params.clear()
+
     html(open_script)
+    # st.sidebar.markdown(url)
+    # AUTH_REQUESTS.Request().get(url)
 
 
 def init_auth():
@@ -235,8 +245,7 @@ def view_login_google():
 
     auth_url = f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={google_client_id}&redirect_uri={google_redirect_uri}&scope=openid%20profile%20email&access_type=offline"
     logger.info(f"URL to authenticate = {auth_url}")
-    open_url(auth_url)
-    # return json.dumps(resp_str)
+    return auth_url
 
 
 def view_auth_google(code):
@@ -253,7 +262,6 @@ def view_auth_google(code):
     google_client_secret = config['DEFAULT']['GOOGLE_CLIENT_SECRET']
     google_redirect_uri = config['DEFAULT']['GOOGLE_REDIRECT_URI']
 
-
     token_url = "https://accounts.google.com/o/oauth2/token"
     data = {
         "code": code,
@@ -263,23 +271,10 @@ def view_auth_google(code):
         "grant_type": "authorization_code",
     }
     logger.info(f"Auth info =, {data}")
-    # try:
-    #     logger.info("First attempt - using requests.Request()")
-    #     request = google.auth.transport.requests.Request()
-    #     response = request.post(token_url, data=data)
-    #     access_token = response.json().get("access_token")
-    #     # print("Access token = ", access_token)
-    #     logger.info(f"Access token = {access_token}")
-    # except Exception:
-    #     logger.error("requests.Request() did not succeed")
-    #     # print()
 
     try:
-        # print("Second attempt - using requests library")
-        logger.info("Second Attempt - using requests library itself")
-
+        logger.info("Using requests library itself")
         response = requests.post(token_url, data=data, timeout=None)
-        # print("Respoiinse =", response.json())
         logger.info(f"Auth response = {response.json()}")
         access_token = response.json().get("access_token")
         id_token = response.json().get("id_token")
@@ -292,9 +287,9 @@ def view_auth_google(code):
     user_info = requests.get("https://www.googleapis.com/oauth2/v1/userinfo",
                              headers={"Authorization": f"Bearer {access_token}"}, timeout=None)
     logger.info(f"Decoded User info : {user_info.json()}")
-    # return user_info.json()
-
-    return json.dumps({ "token": id_token, "access_token": access_token})
+    response_data = {"token": id_token, "access_token": access_token}
+    logger.info(f"Response data = {response_data}")
+    return id_token, access_token
 
 def view_get_token(token):
     """

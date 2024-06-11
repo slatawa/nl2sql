@@ -18,15 +18,20 @@ from utils import default_func, linear_gen_sql, cot_gen_sql, rag_gen_sql
 # import support functions
 from utils import get_feedback, message_queue, add_question_to_db
 # import auth functions
-from utils import login_user, view_auth_google
+from utils import login_user, view_auth_google, view_login_google, back_to_login_page
 
 load_dotenv()
 SHOW_SUCCESS = False
+st.set_page_config(page_title='NL2SQL Studio',
+                       page_icon="📊",
+                       initial_sidebar_state="expanded",
+                       layout='wide')
 
 def define_session_variables():
     """
         Define the session variables once at the start of the app
     """
+    logger.info("Defining Session variables")
     st.session_state.messages = []
     st.session_state.question = ''
     st.session_state.new_question = False
@@ -41,8 +46,9 @@ def define_session_variables():
     st.session_state.add_question_status = False
     st.session_state.result_id = ''
 
-    st.session_state.access_token = ''
-    st.session_state.login_status = False
+    # st.session_state.access_token = None
+    # st.session_state.token = None
+    # st.session_state.login_status = False
 
 
 def define_modals():
@@ -66,7 +72,51 @@ def define_modals():
     st.session_state.info_modal = info_modal
     st.session_state.q_s_modal = q_s_modal
 
-def define_layout():
+def define_pre_auth_layout():
+    """
+        Define the Login page prior to Login
+    """
+    def logo_image():
+        """
+            Display the Logo image and the Login button
+        """
+
+        left_co, cent_co, last_co = st.columns([0.35,0.35,0.3])
+        with cent_co:
+            st.image('solid_g-logo-2.png', )
+            lc, cc, rc = st.columns([0.3,0.4,0.3])
+            with cc:
+                login_link()
+        
+        # st.image('solid_g-logo-2.png')
+
+    def login_link():
+        """
+            Design and Link for the Login button
+            called in logo_image function
+        """
+        st.markdown("""
+            <style>
+            .big-font {
+                font-size:20px !important;
+                background-color: royalblue;
+                border-radius: 20%/50%;
+                width: 105px;
+                height: 1.75em;
+                padding: 0px 0px 0px 30px ;
+                
+            }
+            </style>
+            """, unsafe_allow_html=True)
+        auth_url = view_login_google()
+        hyperlink_string = '<div class="big-font"> <a href="' + auth_url + '" style="color:white" target="_self">Login</a> </div>'
+        logger.info(f"Auth url = {auth_url}")
+        st.markdown(hyperlink_string, unsafe_allow_html=True)    
+
+    logo_image()
+
+
+def define_post_auth_layout():
     """
         Streamlit UI layout with page configuration, styles,
         widgets, main screen and sidebar, etc
@@ -144,8 +194,8 @@ def define_layout():
             with column_1:
                 st.image('google.png')
             with column_2:
-                # st.write('v0.2reorg')
-                login_state = st.toggle("Login")
+                st.write('v0.4')
+                logout_state = st.button("Logout")
 
         with st.sidebar.container(height=140):
             st.session_state.model = st.radio('Pick your Model',
@@ -167,22 +217,14 @@ def define_layout():
             qa_modal = st.session_state.qa_modal
             qa_modal.open()
 
-        if login_state:
-            if st.query_params:
-                logger.info("Login clicked after Appstart")
-                resp = view_auth_google(st.query_params['code'])
-                st.session_state.token = resp['token']
-                st.session_state.access_token = resp['access_token']
-            else:
-                logger.info("On Redirect URI loading")
-                st.session_state.login_status = "True"
-                logger.info("Signing In...")
-                login_user()
-        else:
-            # logger.info("Resetting Access token")
-            st.session_state.access_token = ''
+        if logout_state:
+            logger.info("Logging out")
+            st.session_state.token = None
             st.session_state.login_status = False
+            back_to_login_page()
+            st.query_params.clear()
 
+            
 
     def main_page():
         """
@@ -347,7 +389,7 @@ def define_layout():
 
     # Layout function calls
     layout_functions = {
-            "page_config": page_config,
+            # "page_config": page_config,
             "markdown_styles": markdown_styles,
             "sidebar_components": sidebar_components,
             "main_page": main_page
@@ -355,6 +397,18 @@ def define_layout():
 
     for _, layout_function in layout_functions.items():
         layout_function()
+
+def pre_initialize():
+    """
+        Initialise the Application context
+    """
+
+    if 'init' not in st.session_state:
+        define_session_variables()
+        st.session_state.init = False
+    
+    logger.info(f"Login status = {st.session_state.login_status}")
+
 
 def initialize():
     """
@@ -365,11 +419,7 @@ def initialize():
         st.session_state.init = False
 
     define_modals()
-    define_layout()
-
-    # mc = st.session_state.mc
-    # fc = st.session_state.fc
-    # result_id = ''
+    define_post_auth_layout()
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -449,25 +499,53 @@ def app_load():
     """
         On Application load
     """
+    logger.info("App loaders")
+    found_query_params = False     
     try:
-        # logger.info(f"Query Parameters - {st.query_params}")
-        resp = view_auth_google(st.query_params['code'])
-        st.session_state.token = resp['token']
-        st.session_state.access_token = resp['access_token']
+        logger.info(f"Query Parameters - {st.query_params}")
+        code = st.query_params['code']
+        found_query_params = True
     except Exception:
         logger.info("Login required")
+        found_query_params = False
 
-    # if not st.session_state.access_token :
-    #     logger.info("Login required")
+    if found_query_params:
+        id_token, access_token = view_auth_google(st.query_params['code'])
+        logger.info(f"ID Token = {id_token}")
+        logger.info(f"Access Token = {access_token}")
+        st.session_state.token = id_token
+        st.session_state.access_token = access_token
+        st.session_state.login_status = True
+    else:
+        st.session_state.token = None
+        st.session_state.access_token = None
+        st.session_state.login_status = False
+    
+    logger.info(f"Login status = {st.session_state.login_status}")
 
-funcs_to_exec = {
-    "app_load": app_load,
-    "initialize": initialize,
-    # "redraw": redraw,
-    "add_new_question": add_new_question,
-    "when_user_responded": when_user_responded,
-    "refresh": refresh
-}
 
-for _, function in funcs_to_exec.items():
-    function()
+def render_view():
+    pre_auth_post_logout = {
+        "pre-init": pre_initialize,
+        # "app_load": app_load,
+        "pre_auth_page": define_pre_auth_layout,
+    }
+
+    post_auth = {
+        # "app_load": app_load,
+        "initialize": initialize,
+        # 'modals': define_modals,
+        # "layout" : define_post_auth_layout,
+        # "redraw": redraw,
+        "add_new_question": add_new_question,
+        "when_user_responded": when_user_responded,
+        "refresh": refresh
+    }
+
+    app_load()
+    funcs_to_exec = post_auth if st.session_state.login_status else pre_auth_post_logout
+
+    for _, function in funcs_to_exec.items():
+        function()
+
+render_view()
