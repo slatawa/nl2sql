@@ -357,13 +357,15 @@ def define_post_auth_layout():
                             body = {"proj_name": project,
                                     "dataset":dataset,
                                     "metadata_file":uploaded_file.name}
-                            headers={"Content-type": "application/json"}
+                            headers={"Content-type": "application/json", 
+                                     "Authorization": f"Bearer {st.session_state.access_token}"}
                             # url = "http://localhost:5000"
                             _ = requests.post(url=url+"/projconfig",
                                                 data=json.dumps(body),
                                                 headers=headers,
                                                 timeout=None)
                             _ = requests.post(url=url+"/uploadfile",
+                                                headers={"Authorization": f"Bearer {st.session_state.access_token}"}
                                                 files=files,
                                                 timeout=None)
 
@@ -475,7 +477,9 @@ def when_user_responded():
         data = { "result_id": st.session_state.result_id , "user_feedback": user_feedback}
 
         logger.info(f"User reposnse data to API {data}")
-        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        headers = {'Content-type': 'application/json', 
+                   'Accept': 'text/plain', 
+                   "Authorization": f"Bearer {st.session_state.access_token}"}
         resp = requests.post(url=url,
                             data=json.dumps(data),
                             headers=headers,

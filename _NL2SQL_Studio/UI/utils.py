@@ -55,7 +55,8 @@ def call_generate_sql_api(question, endpoint):
     api_endpoint = f"{api_url}/{endpoint}"
     logger.info(f"Invoking API : {api_endpoint}")
     data = {"question": question, "execute_sql":st.session_state.execution}
-    headers = {"Content-type": "application/json" }
+    headers = {"Content-type": "application/json",
+               "Authorization": f"Bearer {st.session_state.access_token}" }
     logger.info(f"Provided parameters are : Data = {data}")
     api_response = requests.post(api_endpoint,
                                  data=json.dumps(data),
@@ -175,7 +176,9 @@ def add_question_to_db(sample_question, sample_sql):
     logger.info(f"Adding {sample_question} and {sample_sql} to DB")
 
     data = { "question": sample_question, "sql": sample_sql}
-    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    headers = {'Content-type': 'application/json',
+                'Accept': 'text/plain',
+                "Authorization": f"Bearer {st.session_state.access_token}"}
     _ = requests.post(url=url, data=json.dumps(data), headers=headers, timeout=None)
     st.session_state.add_question_status = True
 
