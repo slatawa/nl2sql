@@ -1,4 +1,7 @@
-import json
+"""
+    Rag Executor test file
+"""
+
 from nl2sql.llms.vertexai import text_bison_32k
 from nl2sql.executors.linear_executor.core import CoreLinearExecutor
 #from nl2sql.tasks.sql_generation.rag_pydantic import RagSqlGenerator
@@ -37,7 +40,6 @@ print("Executor ID :", executor.executor_id)
 
 result2 = executor(
     db_name= dataset_name,
-    #question = "Which county has the greatest proportion of CalFresh recipients co-enrolled in at least one additional program? " # @param {type:"string"}
     question = "What is the total revenue for constuction industry? "
 )
 print("\n\n", "="*50, "Generated SQL", "="*50, "\n\n")

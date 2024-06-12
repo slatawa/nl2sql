@@ -1,7 +1,6 @@
 """
     Wrapper file for invoking the Executors from the app.py file
 """
-import os
 import json
 import sys
 import vertexai
@@ -120,7 +119,7 @@ if __name__ == "__main__":
         print("Defaulting to Linear exeutor")
         executor = 'linear'
 
-    f = open(f"utils/{data_file_name}")
+    f = open(f"utils/{data_file_name}", encoding="utf-8")
     zi = json.load(f)
     data_dictionary_read = {
                 "zoominfo": {
@@ -131,16 +130,16 @@ if __name__ == "__main__":
                     zi
                 },
         }
-    
+
     nle = NL2SQL_Executors()
     if executor == 'linear':
-        res_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
+        result_id, gen_sql = nle.linear_executor(data_dict=data_dictionary_read)
         print('linear')
     elif executor == 'cot':
         result_id, gen_sql = nle.cot_executor(data_dict=data_dictionary_read)
         print('cot')
     elif executor == 'rag':
-        res_id, gen_sql = nle.rag_executor(question=question_to_gen)
+        result_id, gen_sql = nle.rag_executor(question=question_to_gen)
         print('rag')
-    
+
     print("Generated SQL = ", gen_sql)

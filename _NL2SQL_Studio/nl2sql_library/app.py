@@ -4,19 +4,21 @@
     Updating user feedback etc
 """
 # from nl2sql_lib_executors import NL2SQL_Executors
-import re
 import sys
 import inspect
 import json
 import os
 
-from utils.utility_functions import *
-
-from flask import Flask, jsonify, request, session
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from google.cloud import bigquery
 from dotenv import load_dotenv
 from loguru import logger
+
+from utils.utility_functions import initialize_db, config_project, get_project_config
+from utils.utility_functions import execute_bq_query, log_sql, log_update_feedback
+from utils.utility_functions import result2nl
+
 
 load_dotenv()
 
@@ -39,7 +41,7 @@ bigquery_connection_string = initialize_db(get_project_config()['config']['proj_
 
 data_file_name = get_project_config()['config']['metadata_file']
 
-f = open(f"utils/{data_file_name}")
+f = open(f"utils/{data_file_name}", encoding="utf-8")
 zi = json.load(f)
 data_dictionary_read = {
             "zoominfo": {
@@ -196,12 +198,13 @@ def project_config():
     """
         Updates the Project Configuration details
     """
+    logger.info("Updating project configuration")
     project = request.json['proj_name']
     dataset = request.json['bq_dataset']
     metadata_file = request.json['metadata_file']
     config_project(project, dataset, metadata_file)
 
-    return "successs"
+    return json.dumps({"status": "success"})
 
 @app.route('/uploadfile', methods=['POST'])
 def upload_file():
@@ -209,7 +212,7 @@ def upload_file():
         Saves the data dictionary / metadata cache data
          received over HTTP request into a file 
     """
-    print("file received")
+    logger.info("File received")
     try:
         file = request.files['file']
         data = file.read()
@@ -217,17 +220,18 @@ def upload_file():
         data2 = json.loads(my_json)
         data_to_save = json.dumps(data2, indent=4)
         target_file = get_project_config()['config']['metadata_file']
-        with open(f"utils/{target_file}", 'w') as outFile:
-            outFile.write(data_to_save)
-        return "successs"
+        with open(f"utils/{target_file}", 'w', encoding="utf-8") as outfile:
+            outfile.write(data_to_save)
+        return json.dumps({"status": "Successfully uploaded file"})
     except RuntimeError:
-        return "failed to upload file"
+        return json.dumps({"status": "Failed to upload file"})
 
 @app.route('/userfb', methods=['POST'])
 def user_feedback():
     """
         Updates the User feedback sent from UI
     """
+    logger.info("Updating user feedback")
     result_id = request.json['result_id']
     feedback = request.json['user_feedback']
     try:

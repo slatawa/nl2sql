@@ -86,32 +86,36 @@ def execute_bq_query(sql_query=""):
     """
     project = get_project_config()['config']['proj_name']
     client = bigquery.Client(project=project)
-    logger.info("Execute bq query")
+    logger.info(f"Execute bq query : {sql_query}")
     # query_job = client.query("select * from `q_and_a_db.questions_and_gensqls` \
     #                          where created_by = 'CoT executor' " )
-    query_job = client.query(sql_query )
-    results = query_job.result()
-    results = query_job.to_dataframe()
-    logger.info("Execution result = ", results)
-    return results
+    try:
+        query_job = client.query(sql_query )
+        results = query_job.result()
+        results = query_job.to_dataframe()
+        logger.info("Execution result = ", results)
+        return results
+    except Exception:
+        return "Execution failed"
 
-def bq_insert_data(result_id="dummy",
-                    question="dummy",
-                    sql="dummy", executor="dummy",
-                    feedback="False"):
-    """
-        Adds a new row to BigQuery table
-    """
-    project = get_project_config()['config']['proj_name']
-    dataset = "q_and_a_db"
-    client = bigquery.Client(project=project)
-    table_ref = f"{project}.{dataset}.questions_and_gensqls"
+# Below function for future upgrades enabling logging within BQ
+# def bq_insert_data(result_id="dummy",
+#                     question="dummy",
+#                     sql="dummy", executor="dummy",
+#                     feedback="False"):
+#     """
+#         Adds a new row to BigQuery table
+#     """
+#     project = get_project_config()['config']['proj_name']
+#     dataset = "q_and_a_db"
+#     client = bigquery.Client(project=project)
+#     table_ref = f"{project}.{dataset}.questions_and_gensqls"
 
-    insert_query = f'INSERT INTO {table_ref} VALUES\
-          ("{result_id}", "{question}", "{sql}", "{executor}", {feedback})'
-    logger.info("Query to insert=", insert_query)
-    query_job = client.query(insert_query)
-    query_job.result()
+#     insert_query = f'INSERT INTO {table_ref} VALUES\
+#           ("{result_id}", "{question}", "{sql}", "{executor}", {feedback})'
+#     logger.info("Query to insert=", insert_query)
+#     query_job = client.query(insert_query)
+#     query_job.result()
 
 def log_sql(result_id="dummy", question="dummy", sql="dummy", executor="dummy", feedback="False"):
     """
@@ -148,20 +152,21 @@ def log_update_feedback(result_id, user_feedback):
     with open(SQL_LOG_FILE, 'w', encoding="utf-8") as outfile:
         json.dump(logdata, outfile)
 
-def bq_update_userfeedback(result_id, user_feedback):
-    """
-        Updates BQ row with user feedback
-    """
-    project = get_project_config()['config']['proj_name']
-    dataset = "q_and_a_db"
-    client = bigquery.Client(project=project)
-    # table_ref = "sl-test-project-363109.q_and_a_db.questions_and_gensqls"
-    table_ref = f"{project}.{dataset}.questions_and_gensqls"
-    update_query = f"UPDATE {table_ref} SET user_feedback={user_feedback}\
-          WHERE result_id = '{result_id}'"
-    logger.info("Query to update = ", update_query)
-    query_job = client.query(update_query )
-    query_job.result()
+# Below for future upgrade to manage usr feedback in BQ
+# def bq_update_userfeedback(result_id, user_feedback):
+#     """
+#         Updates BQ row with user feedback
+#     """
+#     project = get_project_config()['config']['proj_name']
+#     dataset = "q_and_a_db"
+#     client = bigquery.Client(project=project)
+#     # table_ref = "sl-test-project-363109.q_and_a_db.questions_and_gensqls"
+#     table_ref = f"{project}.{dataset}.questions_and_gensqls"
+#     update_query = f"UPDATE {table_ref} SET user_feedback={user_feedback}\
+#           WHERE result_id = '{result_id}'"
+#     logger.info("Query to update = ", update_query)
+#     query_job = client.query(update_query )
+#     query_job.result()
 
 def result2nl(question, result):
     """

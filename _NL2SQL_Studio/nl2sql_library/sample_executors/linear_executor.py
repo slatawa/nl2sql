@@ -26,7 +26,7 @@ data_dictionary_read = {
     }
 
 
-## Executor Setup Code
+# # Executor Setup Code
 
 bigquery_connection_string = "bigquery://sl-test-project-363109/zoominfo" # @param {type:"string"}
 

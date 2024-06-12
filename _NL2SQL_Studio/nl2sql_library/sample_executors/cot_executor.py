@@ -51,7 +51,7 @@ dd_cot_executor = CoreLinearExecutor.from_connection_string_map(
 print("\n\n", "="*25, "Executor Created", "="*25, "\n\n")
 print("Executor ID :", dd_cot_executor.executor_id)
 
-## Now run the executor with a sample question
+# # Now run the executor with a sample question
 
 dd_cot_result = dd_cot_executor(
     db_name= dataset_name,

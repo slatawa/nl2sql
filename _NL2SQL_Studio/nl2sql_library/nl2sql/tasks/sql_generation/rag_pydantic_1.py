@@ -85,12 +85,15 @@ class RagSqlGenerator(BaseSqlGenerationTask):
         # meta_data_json_path = "./nl2sql/datasets/zoominfo-metadata.json"
         try:
             print(os.path.abspath(os.path.join("./", os.pardir)))
-            app_dir = os.path.abspath(os.path.join("./", os.pardir))
+            app_dir = os.path.abspath(os.path.join("./", os.curdir))
 
         except:
             print("Some issue in file paths")
-                        
-        meta_data_json_path = "zoominfo-metadata.json"
+        if 'sample_executors' in app_dir:
+            app_dir = os.path.abspath(os.path.join("./", os.pardir))
+            meta_data_json_path = app_dir + "/utils/zoominfo-metadata.json"
+        else:
+            meta_data_json_path = app_dir + "/utils/zoominfo-metadata.json"
         
         print("Metadata path new = ", meta_data_json_path)
         
@@ -660,7 +663,7 @@ students answer: {llm_amswer}
             return df
         except Exception as exc:
             raise Exception(traceback.print_exc()) from exc
-       
+
 ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
 
 class Nl2Sql_embed():
@@ -763,7 +766,7 @@ class Nl2Sql_embed():
             output_json.append(res)
 
         return output_json
-    
+
 
 class PgSqlEmb():
     
@@ -781,9 +784,14 @@ class PgSqlEmb():
         
         # self.INDEX_FILE = 'saved_index_pgdata'
         #self.INDEX_FILE = f"/home/vinitamishra/NL2SQL/nl2sql/datasets/vectordb_index/saved_index_pgdata"
-        app_dir = os.path.abspath(os.path.join("./", os.pardir))
+        app_dir = os.path.abspath(os.path.join("./", os.curdir))
+        if 'sample_executors' in app_dir:
+            app_dir = os.path.abspath(os.path.join("./", os.pardir))
+            self.INDEX_FILE = app_dir + '/utils/saved_index_pgdata'
+        else:
+            self.INDEX_FILE = app_dir + '/utils/saved_index_pgdata'
+        print("Index file = ", self.INDEX_FILE)
         
-        self.INDEX_FILE = 'saved_index_pgdata'
         self.embedding_model = TextEmbeddingModel.from_pretrained("textembedding-gecko@003")
         self.pool = self.getpool()
         
