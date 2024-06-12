@@ -365,7 +365,7 @@ def define_post_auth_layout():
                                                 headers=headers,
                                                 timeout=None)
                             _ = requests.post(url=url+"/uploadfile",
-                                                headers={"Authorization": f"Bearer {st.session_state.access_token}"}
+                                                headers={"Authorization": f"Bearer {st.session_state.access_token}"},
                                                 files=files,
                                                 timeout=None)
 
