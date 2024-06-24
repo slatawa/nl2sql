@@ -15,7 +15,6 @@
 # import pandas as pd
 import numpy as np
 
-# from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # from google.cloud import aiplatform
@@ -47,7 +46,9 @@ ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
 
 
 class Nl2Sql_embed():
-
+    """
+        Local Embeddings and Local Vector DB class
+    """
     def __init__(self):
         # Init function
         self.EMBEDDING_FILE = "dataset/embeddings.json"
@@ -56,6 +57,10 @@ class Nl2Sql_embed():
             TextEmbeddingModel.from_pretrained("textembedding-gecko@003")
 
     def generate_embedding(self, query, sql='blank sql'):
+        """
+            Generates text embeddings
+        """
+
         # Replace this with your actual embedding generation
         # using text-gecko003 or another model
         q_embeddings = self.embedding_model.get_embeddings([query])[0].values
@@ -72,6 +77,10 @@ class Nl2Sql_embed():
     # return embeddings
 
     def insert_data(self, question, sql):
+        """
+            Inserts data to Embeddings file
+        """
+
         logger.info(f"Inserting data. Question : {question}, SQL : {sql}")
         try:
             with open(self.EMBEDDING_FILE, "r") as f:
@@ -91,6 +100,10 @@ class Nl2Sql_embed():
             json.dump(data, f)
 
     def load_embeddings(self):
+        """
+            Read the Embeddigs.json file to memory
+        """
+
         with open(self.EMBEDDING_FILE, "r") as f:
             data = json.load(f)
         return data
@@ -100,6 +113,10 @@ class Nl2Sql_embed():
         return -cosine_similarity([embedding1], [embedding2])[0][0]
 
     def find_closest_questions(self, new_question, data, n=3):
+        """
+            Return 3 most similar queeries and SQLs
+        """
+
         new_embedding, _ = self.generate_embedding(new_question)
 
         distances = [
@@ -112,6 +129,10 @@ class Nl2Sql_embed():
         return [(data[i]['question'], data[i]['sql']) for i in closest_indices]
 
     def create_vectordb_index(self):
+        """
+            Recreate VectorDB indes file
+        """
+
         embeddings_data = self.load_embeddings()
 
         query_embeddings = [
@@ -130,6 +151,9 @@ class Nl2Sql_embed():
         return
 
     def search_matching_queries(self, new_query):
+        """
+            Return 3 most similar queeries and SQLs
+        """
 
         embeddings_data = self.load_embeddings()
         query_array_updated = [[item['question'],
@@ -153,6 +177,9 @@ class Nl2Sql_embed():
 
 
 class PgSqlEmb():
+    """
+        PostgreSQL DB interface class
+    """
 
     def __init__(self,
                  proj_id,
@@ -183,6 +210,9 @@ class PgSqlEmb():
         self.pool = self.getpool()
 
     def getconn(self) -> pg8000.dbapi.Connection:
+        """
+        Get DB connection
+        """
         connector = Connector()
 
         conn: pg8000.dbapi.Connection = connector.connect(
@@ -196,6 +226,9 @@ class PgSqlEmb():
         return conn
 
     def getpool(self):
+        """
+        return connection pool
+        """
         pool = sqlalchemy.create_engine(
             "postgresql+pg8000://",
             creator=self.getconn,
@@ -204,6 +237,9 @@ class PgSqlEmb():
         return pool
 
     def create_table(self):
+        """
+        Create table in PostgreSQL Db
+        """
         sql_create = f"""CREATE TABLE IF NOT EXISTS {self.PGTABLE} (
              q_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
              question TEXT,
@@ -214,6 +250,9 @@ class PgSqlEmb():
             conn.execute(sql_create)
 
     def empty_table(self, remove_index=True):
+        """
+        Delete all rows in the PostgreSQL DB
+        """
         sql_clear = f'DELETE from {self.PGTABLE}'
         with self.pool.connect() as conn:
             conn.execute(sql_clear)
@@ -224,7 +263,9 @@ class PgSqlEmb():
                 pass
 
     def insert_row(self, query, sql):
-
+        """
+            Insert question and embeddings to PostgreSQL DB
+        """
         sql = sql.replace("'", "<sq>")
         sql = sql.replace('"', '<dq>')
         emb = self.embedding_model.get_embeddings([query])[0].values
@@ -238,12 +279,18 @@ class PgSqlEmb():
         self.update_vectordb_index(query)
 
     def extract_data(self):
+        """
+            REturn all data from DB
+        """
         sql_data = f'SELECT * FROM {self.PGTABLE}'
         with self.pool.connect() as conn:
             data = conn.execute(sql_data)
         return data
 
     def extract_pg_embeddings(self):
+        """
+            Extract embeddings data fro PG database
+        """
         tmp = self.extract_data()
         df = DataFrame(tmp.fetchall())
 
@@ -270,6 +317,9 @@ class PgSqlEmb():
         return df['question'], df['sql'], new_array
 
     def recreate_vectordb_index(self):
+        """
+            Regenerate VectorDB file from PG Table data
+        """
         tmp = self.extract_data()
         df = DataFrame(tmp.fetchall())
 
@@ -299,6 +349,9 @@ class PgSqlEmb():
         return
 
     def update_vectordb_index(self, query):
+        """
+            Update VectorDB on every query insert
+        """
         emb = self.embedding_model.get_embeddings([query])[0].values
         new_array = [emb]
 
@@ -316,6 +369,9 @@ class PgSqlEmb():
         return
 
     def search_matching_queries(self, new_query):
+        """
+            Return 3 most similar queeries and SQLs
+        """
         tmp = self.extract_data()
         df = DataFrame(tmp.fetchall())
 

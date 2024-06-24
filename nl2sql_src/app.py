@@ -40,6 +40,7 @@ app.config["CORS_HEADERS"] = "Content-Type"
 
 dataset_name = 'zoominfo'
 
+
 @app.route("/")
 def spec():
     """
@@ -52,7 +53,7 @@ def spec():
 @app.route("/api/lite/generate", methods=["POST"])
 def nl2sql_lite_generate():
     """
-    Invokes the Linear Executor
+    Invokes the NL2SQL Lite SQL Generator
     """
     question = request.json["question"]
     execute_sql = request.json["execute_sql"]
@@ -170,4 +171,3 @@ def nl2sql_lite_generate():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
-

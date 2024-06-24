@@ -51,7 +51,9 @@ client = bigquery.Client()
 
 
 class Nl2sqlBq:
-    "Bigquery nl2sql class"
+    """
+        NL2SQL Lite SQL Generator class
+    """
 
     def __init__(self,
                  project_id,
@@ -59,7 +61,9 @@ class Nl2sqlBq:
                  metadata_json_path=None,
                  model_name="gemini-pro",
                  tuned_model=True):
-        "Init function"
+        """
+            Init function
+        """
         self.dataset_id = f"{project_id}.{dataset_id}"
         self.metadata_json = None
         self.model_name = model_name
@@ -107,6 +111,9 @@ class Nl2sqlBq:
                   pg_pwd,
                   pg_table,
                   index_file='saved_index_pgdata'):
+        """
+            Initialising the PG DB
+        """
         self.pge = PgSqlEmb(proj_id,
                             loc,
                             pg_inst,
@@ -116,13 +123,17 @@ class Nl2sqlBq:
                             pg_table)
 
     def get_all_table_names(self):
-        "Provides list of table names in dataset"
+        """
+            Provides list of table names in dataset
+        """
         tables = client.list_tables(self.dataset_id)
         all_table_names = [table.table_id for table in tables]
         return all_table_names
 
     def get_column_value_examples(self, tname, column_name, enum_option_limit):
-        "Provide example values for string columns"
+        """
+        Provide example values for string columns
+        """
         examples_str = ""
         if pd.read_sql(
                 sql=f"SELECT COUNT(DISTINCT {column_name}) <=\
@@ -147,7 +158,9 @@ class Nl2sqlBq:
                              data_dict_path=None,
                              col_values_distribution=False,
                              enum_option_limit=10):
-        "Creates metadata json file"
+        """
+        Creates metadata json file
+        """
         try:
             data_dict = dict()
             if data_dict_path:
@@ -361,7 +374,9 @@ class Nl2sqlBq:
             return ""
 
     def generate_sql(self, question, table_name=None, logger_file="log.txt"):
-        # Main function which converts NL to SQL
+        """
+        Main function which converts NL to SQL
+        """
 
         # step-1 table selection
         try:
@@ -405,7 +420,9 @@ class Nl2sqlBq:
                               question,
                               table_name=None,
                               logger_file="log.txt"):
-        # Main function which converts NL to SQL
+        """
+        Main function which converts NL to SQL using few shot prompting
+        """
 
         # step-1 table selection
         try:
@@ -464,7 +481,9 @@ class Nl2sqlBq:
                                          table_name=None,
                                          prev_sql="",
                                          logger_file="log.txt"):
-        # Main function which converts NL to SQL
+        """
+        Returns only the few shot prompt
+        """
 
         # step-1 table selection
         try:
@@ -574,7 +593,11 @@ class Nl2sqlBq:
                 raise Exception(traceback.print_exc()) from exc
 
     def self_reflection(self, question, query, max_tries=5):
-        status, msg = self.execute_query(query, dry_run=True)
+        """
+        Retries the query generation process in case of failure
+        for the specified number of times
+        """
+        status, _ = self.execute_query(query, dry_run=True)
         good_sql = False
         if not status:
             # Repeat generation of the sql
@@ -592,7 +615,9 @@ class Nl2sqlBq:
                             question,
                             table_name=None,
                             logger_file="log.txt"):
-        "Converts text to sql and also executes sql query"
+        """
+        Converts text to sql and also executes sql query
+        """
         try:
             # query = self.text_to_sql(question,
             #                          table_name,logger_file = logger_file)
@@ -609,7 +634,9 @@ class Nl2sqlBq:
                                      question,
                                      table_name=None,
                                      logger_file="log.txt"):
-        "Converts text to sql and also executes sql query"
+        """
+        Converts text to sql and also executes sql query
+        """
         try:
             query = self.generate_sql_few_shot(question,
                                                table_name,
@@ -748,6 +775,9 @@ class Nl2sqlBq:
             raise Exception(traceback.print_exc()) from exc
 
     def table_details(self, table_name):
+        """
+        Cretes the Table details required for Joins
+        """
         f = open(self.metadata_json, encoding="utf-8")
         metadata_json = json.loads(f.read())
 
@@ -777,6 +807,9 @@ class Nl2sqlBq:
                         sample_question=None,
                         sample_sql=None,
                         one_shot=False):
+        """
+            Crete the prompt for Joins
+        """
         prompt = ""
         table_1 = self.table_details(table_1_name)
         table_2 = self.table_details(table_2_name)
@@ -799,6 +832,9 @@ class Nl2sqlBq:
         return prompt
 
     def invoke_llm(self, prompt):
+        """
+            Invoke the LLM
+        """
         response = self.llm.invoke(prompt)
         sql_query = response.replace('sql', '').replace('```', '')
 
@@ -817,6 +853,9 @@ class Nl2sqlBq:
                                 sample_question,
                                 sample_sql,
                                 question):
+        """
+            Table filter for multi-turn prompting
+        """
         table_info = self.table_filter_promptonly(question)
         prompt = multi_table_prompt.format(table_info=table_info,
                                            example_question=sample_question,
@@ -839,6 +878,10 @@ class Nl2sqlBq:
                                           genai_model_name="GeminiPro",
                                           max_tries=5,
                                           return_all=False):
+        """
+            Wrapper function for Standard, Multi-turn and Self Correct
+            approach of SQL generation
+        """
         tries = 0
         error_messages = []
         prompts = [prompt]
@@ -875,10 +918,10 @@ class Nl2sqlBq:
                     generated_sql_query.split('\n')[1:-1]
                 )
 
-                generated_sql_query = nl2sqlbq_client.case_handler_transform(
+                generated_sql_query = self.case_handler_transform(
                     generated_sql_query
                 )
-                generated_sql_query = nl2sqlbq_client.add_dataset_to_query(
+                generated_sql_query = self.add_dataset_to_query(
                     generated_sql_query
                 )
                 df = client.query(generated_sql_query).to_dataframe()
@@ -951,61 +994,61 @@ class Nl2sqlBq:
             case 'STANDARD':
                 if not one_shot:
                     # Zero-shot Join query generation
-                    join_prompt = nl2sqlbq_client.get_join_prompt(data_set,
-                                                                  table_1_name,
-                                                                  table_2_name,
-                                                                  question)
-                    gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt)
+                    join_prompt = self.get_join_prompt(dataset,
+                                                       table_1_name,
+                                                       table_2_name,
+                                                       question)
+                    gen_join_sql = self.invoke_llm(join_prompt)
                 else:
                     # One-shot Join query generation
-                    join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(
-                        data_set,
+                    join_prompt_one_shot = self.get_join_prompt(
+                        dataset,
                         table_1_name,
                         table_2_name,
                         question,
                         sample_question,
                         sample_sql,
-                        few_shot=True
+                        one_shot=True
                     )
-                    gen_join_sql = nl2sqlbq_client.invoke_llm(
+                    gen_join_sql = self.invoke_llm(
                         join_prompt_one_shot
                     )
 
             case 'MULTI_TURN':
                 table_1_name, table_2_name = \
-                    nl2sqlbq_client.multi_turn_table_filter(
+                    self.multi_turn_table_filter(
                         table_1_name=example_table1,
                         table_2_name=example_table2,
-                        example_question=sample_question,
-                        example_sql=sample_sql,
+                        sample_question=sample_question,
+                        sample_sql=sample_sql,
                         question=question
                         )
                 # One-shot Join query generation
-                join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(
+                join_prompt_one_shot = self.get_join_prompt(
                     data_set,
                     table_1_name,
                     table_2_name,
                     question,
                     sample_question,
                     sample_sql,
-                    few_shot=True
+                    one_shot=True
                 )
-                gen_join_sql = nl2sqlbq_client.invoke_llm(
+                gen_join_sql = self.invoke_llm(
                     join_prompt_one_shot
                 )
 
             case 'SELF_CORRECT':
-                join_prompt_one_shot = nl2sqlbq_client.get_join_prompt(
+                join_prompt_one_shot = self.get_join_prompt(
                     data_set,
                     table_1_name,
                     table_2_name,
                     question,
                     sample_question,
                     sample_sql,
-                    few_shot=True
+                    one_shot=True
                 )
                 # Self-Correction Approach
-                responses = nl2sqlbq_client.gen_and_exec_and_self_correct_sql(
+                responses = self.gen_and_exec_and_self_correct_sql(
                     join_prompt_one_shot
                 )
                 gen_join_sql = responses[0]['query']
@@ -1089,7 +1132,7 @@ if __name__ == '__main__':
                                                            question,
                                                            sample_question,
                                                            sample_sql,
-                                                           few_shot=True)
+                                                           one_shot=True)
     gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt_one_shot)
     print("SQL query wiith Join - ", gen_join_sql)
 
@@ -1099,8 +1142,8 @@ if __name__ == '__main__':
     table_1_name, table_2_name = nl2sqlbq_client.multi_turn_table_filter(
         table_1_name=example_table_1,
         table_2_name=example_table_2,
-        example_question=sample_question,
-        example_sql=sample_sql,
+        sample_question=sample_question,
+        sample_sql=sample_sql,
         question=question
     )
     # One-shot Join query generation
@@ -1110,7 +1153,7 @@ if __name__ == '__main__':
                                                            question,
                                                            sample_question,
                                                            sample_sql,
-                                                           few_shot=True)
+                                                           one_shot=True)
     gen_join_sql = nl2sqlbq_client.invoke_llm(join_prompt_one_shot)
     print("SQL query wiith Join - ", gen_join_sql)
 
