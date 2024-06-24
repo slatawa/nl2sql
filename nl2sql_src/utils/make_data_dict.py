@@ -12,7 +12,9 @@ table_name = 'Funding_search'
 df_table = pd.read_excel(base_dir+table_file)
 df_data_dict = pd.read_excel(base_dir+data_dict_file, sheet_name=sheet_name)
 
-data_dict = {i: (j, k) for i, j, k in zip(df_data_dict.Name, df_data_dict.ID, df_data_dict.Description)}
+data_dict = {i: (j, k) for i, j, k in zip(df_data_dict.Name,
+                                          df_data_dict.ID,
+                                          df_data_dict.Description)}
 
 final_dict = {}
 for col in df_table.columns:

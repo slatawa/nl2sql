@@ -1,10 +1,12 @@
-import unittest
-from unittest.mock import patch
+# import unittest
+# from unittest.mock import patch
 import csv
 import langchain
-from nl2sql import table_filter 
+from nl2sql import table_filter
 
-llm = langchain.llms.VertexAI(temperature=0, model_name="text-bison@latest", max_output_tokens=2048)
+llm = langchain.llms.VertexAI(temperature=0,
+                              model_name="text-bison@latest",
+                              max_output_tokens=2048)
 
 
 def run_tests_generate_csv():
@@ -18,11 +20,13 @@ def run_tests_generate_csv():
             'expected_table': ['authorizations_search']
         },
         {
-            'question': "How many transactions went to Visa and Mastercard for the last month?",
+            'question': "How many transactions went to Visa and Mastercard\
+                for the last month?",
             'expected_table': ['authorizations_search']
         },
         {
-            'question': "List all online declined discover transactions for today.",
+            'question': "List all online declined discover transactions\
+                for today.",
             'expected_table': ['authorizations_search']
         },
         {
@@ -30,27 +34,33 @@ def run_tests_generate_csv():
             'expected_table': ['settlement_search']
         },
         {
-            'question': "What was the total sale amount for transactions settled via debit networks?",
+            'question': "What was the total sale amount for transactions\
+                settled via debit networks?",
             'expected_table': ['settlement_search']
         },
         {
-            'question': "Show me settlement summary by plan code for last week for swiped transactions?",
+            'question': "Show me settlement summary by plan code for last\
+                week for swiped transactions?",
             'expected_table': ['settlement_search']
         },
         {
-            'question': "What are my total deposits broken down by deposit type last week?",
+            'question': "What are my total deposits broken down by deposit\
+                type last week?",
             'expected_table': ['funding_search']
         },
         {
-            'question': "Which day within the last month was my highest funding?",
+            'question': "Which day within the last month was my highest\
+                funding?",
             'expected_table': ['funding_search']
         },
         {
-            'question': "What is the Fees to Deposit ratio for yesterdays bank deposit?",
+            'question': "What is the Fees to Deposit ratio for\
+                yesterdays bank deposit?",
             'expected_table': ['funding_search']
         },
         {
-            'question': "What is the Win to Loss ratio on disputes last month?",
+            'question': "What is the Win to Loss ratio on disputes\
+                last month?",
             'expected_table': ['chargebacks_search']
         },
         {
@@ -58,7 +68,8 @@ def run_tests_generate_csv():
             'expected_table': ['chargebacks_search']
         },
         {
-            'question': "What are my top 5 stores from where I am getting the most disputes?",
+            'question': "What are my top 5 stores from\
+                where I am getting the most disputes?",
             'expected_table': ['chargebacks_search']
         },
         {
@@ -78,15 +89,14 @@ def run_tests_generate_csv():
             expected_table = test_case['expected_table']
 
             llm_selected_table = table_filter(question)
-            
-            
+
             if expected_table == llm_selected_table:
                 result = 'Pass'
             else:
                 result = 'Fail'
-                
+
             print(result)
-            
+
             writer.writerow({
                 'Question': question,
                 'Expected_Table': ', '.join(expected_table),
@@ -95,6 +105,7 @@ def run_tests_generate_csv():
             })
 
     print(f"Test results written to {output_file}")
+
 
 if __name__ == '__main__':
     # unittest.main()
